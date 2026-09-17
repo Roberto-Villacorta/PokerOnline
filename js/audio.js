@@ -1,252 +1,265 @@
 /**
- * Sintetizador de Efectos de Sonido de Casino con Web Audio API
- * No depende de archivos de audio externos, garantizando funcionamiento 100% autónomo y sin latencia.
+ * Sintetizador de Efectos de Sonido de Casino en Castellano (Web Audio API)
+ * Totalmente autónomo sin dependencias externas.
  */
 
-class SoundFX {
+class EfectosSonido {
     constructor() {
-        this.ctx = null;
-        this.isMuted = false;
-        this.initOnFirstInteraction();
+        this.contexto = null;
+        this.estaSilenciado = false;
+        this.iniciarEnPrimeraInteraccion();
     }
 
-    init() {
-        if (!this.ctx) {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (AudioContext) {
-                this.ctx = new AudioContext();
+    iniciar() {
+        if (!this.contexto) {
+            const ContextoAudio = window.AudioContext || window.webkitAudioContext;
+            if (ContextoAudio) {
+                this.contexto = new ContextoAudio();
             }
         }
-        if (this.ctx && this.ctx.state === 'suspended') {
-            this.ctx.resume();
+        if (this.contexto && this.contexto.state === 'suspended') {
+            this.contexto.resume();
         }
     }
 
-    initOnFirstInteraction() {
-        const unlock = () => {
-            this.init();
-            document.removeEventListener('click', unlock);
-            document.removeEventListener('keydown', unlock);
-            document.removeEventListener('touchstart', unlock);
+    iniciarEnPrimeraInteraccion() {
+        const desbloquear = () => {
+            this.iniciar();
+            document.removeEventListener('click', desbloquear);
+            document.removeEventListener('keydown', desbloquear);
+            document.removeEventListener('touchstart', desbloquear);
         };
-        document.addEventListener('click', unlock, { once: true });
-        document.addEventListener('keydown', unlock, { once: true });
-        document.addEventListener('touchstart', unlock, { once: true });
+        document.addEventListener('click', desbloquear, { once: true });
+        document.addEventListener('keydown', desbloquear, { once: true });
+        document.addEventListener('touchstart', desbloquear, { once: true });
     }
 
+    conmutarSilencio() {
+        this.estaSilenciado = !this.estaSilenciado;
+        return this.estaSilenciado;
+    }
+
+    // Alias compatibilidad
     toggleMute() {
-        this.isMuted = !this.isMuted;
-        return this.isMuted;
+        return this.conmutarSilencio();
     }
 
     /**
      * Sonido al repartir o deslizar una carta sobre el tapete
      */
-    playCardDeal() {
-        if (this.isMuted) return;
-        this.init();
-        if (!this.ctx) return;
+    reproducirRepartoCarta() {
+        if (this.estaSilenciado) return;
+        this.iniciar();
+        if (!this.contexto) return;
 
-        const bufferSize = this.ctx.sampleRate * 0.08;
-        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-            data[i] = Math.random() * 2 - 1;
+        const tamanoBuffer = this.contexto.sampleRate * 0.08;
+        const buffer = this.contexto.createBuffer(1, tamanoBuffer, this.contexto.sampleRate);
+        const datos = buffer.getChannelData(0);
+        for (let i = 0; i < tamanoBuffer; i++) {
+            datos[i] = Math.random() * 2 - 1;
         }
 
-        const noise = this.ctx.createBufferSource();
-        noise.buffer = buffer;
+        const ruido = this.contexto.createBufferSource();
+        ruido.buffer = buffer;
 
-        const filter = this.ctx.createBiquadFilter();
-        filter.type = 'bandpass';
-        filter.frequency.value = 1400;
-        filter.Q.value = 2.5;
+        const filtro = this.contexto.createBiquadFilter();
+        filtro.type = 'bandpass';
+        filtro.frequency.value = 1400;
+        filtro.Q.value = 2.5;
 
-        const gain = this.ctx.createGain();
-        const now = this.ctx.currentTime;
-        gain.gain.setValueAtTime(0.01, now);
-        gain.gain.exponentialRampToValueAtTime(0.2, now + 0.015);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.075);
+        const ganancia = this.contexto.createGain();
+        const ahora = this.contexto.currentTime;
+        ganancia.gain.setValueAtTime(0.01, ahora);
+        ganancia.gain.exponentialRampToValueAtTime(0.2, ahora + 0.015);
+        ganancia.gain.exponentialRampToValueAtTime(0.001, ahora + 0.075);
 
-        noise.connect(filter);
-        filter.connect(gain);
-        gain.connect(this.ctx.destination);
+        ruido.connect(filtro);
+        filtro.connect(ganancia);
+        ganancia.connect(this.contexto.destination);
 
-        noise.start(now);
+        ruido.start(ahora);
     }
+    playCardDeal() { this.reproducirRepartoCarta(); }
 
     /**
-     * Sonido de fichas de cerámica chocando
+     * Sonido de fichas cerámicas de poker
      */
-    playChipClink(count = 2) {
-        if (this.isMuted) return;
-        this.init();
-        if (!this.ctx) return;
+    reproducirTintineoFichas(cantidad = 2) {
+        if (this.estaSilenciado) return;
+        this.iniciar();
+        if (!this.contexto) return;
 
-        const now = this.ctx.currentTime;
+        const ahora = this.contexto.currentTime;
 
-        for (let i = 0; i < count; i++) {
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
+        for (let i = 0; i < cantidad; i++) {
+            const osc = this.contexto.createOscillator();
+            const ganancia = this.contexto.createGain();
 
-            const freq = 1800 + Math.random() * 900;
+            const frec = 1800 + Math.random() * 900;
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, now + i * 0.045);
-            osc.frequency.exponentialRampToValueAtTime(800, now + i * 0.045 + 0.035);
+            osc.frequency.setValueAtTime(frec, ahora + i * 0.045);
+            osc.frequency.exponentialRampToValueAtTime(800, ahora + i * 0.045 + 0.035);
 
-            gain.gain.setValueAtTime(0.01, now + i * 0.045);
-            gain.gain.exponentialRampToValueAtTime(0.22, now + i * 0.045 + 0.005);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.045 + 0.04);
+            ganancia.gain.setValueAtTime(0.01, ahora + i * 0.045);
+            ganancia.gain.exponentialRampToValueAtTime(0.22, ahora + i * 0.045 + 0.005);
+            ganancia.gain.exponentialRampToValueAtTime(0.001, ahora + i * 0.045 + 0.04);
 
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
+            osc.connect(ganancia);
+            ganancia.connect(this.contexto.destination);
 
-            osc.start(now + i * 0.045);
-            osc.stop(now + i * 0.045 + 0.045);
+            osc.start(ahora + i * 0.045);
+            osc.stop(ahora + i * 0.045 + 0.045);
         }
     }
+    playChipClink(count) { this.reproducirTintineoFichas(count); }
 
     /**
-     * Sonido de "Pasar" (doble toque en la mesa)
+     * Sonido de "Pasar" (toque en el tapete)
      */
-    playCheckTap() {
-        if (this.isMuted) return;
-        this.init();
-        if (!this.ctx) return;
+    reproducirToquePaso() {
+        if (this.estaSilenciado) return;
+        this.iniciar();
+        if (!this.contexto) return;
 
-        const now = this.ctx.currentTime;
-        [0, 0.11].forEach(delay => {
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
+        const ahora = this.contexto.currentTime;
+        [0, 0.11].forEach(retraso => {
+            const osc = this.contexto.createOscillator();
+            const ganancia = this.contexto.createGain();
 
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(160, now + delay);
-            osc.frequency.exponentialRampToValueAtTime(60, now + delay + 0.05);
+            osc.frequency.setValueAtTime(160, ahora + retraso);
+            osc.frequency.exponentialRampToValueAtTime(60, ahora + retraso + 0.05);
 
-            gain.gain.setValueAtTime(0.35, now + delay);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.05);
+            ganancia.gain.setValueAtTime(0.35, ahora + retraso);
+            ganancia.gain.exponentialRampToValueAtTime(0.001, ahora + retraso + 0.05);
 
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
+            osc.connect(ganancia);
+            ganancia.connect(this.contexto.destination);
 
-            osc.start(now + delay);
-            osc.stop(now + delay + 0.055);
+            osc.start(ahora + retraso);
+            osc.stop(ahora + retraso + 0.055);
         });
     }
+    playCheckTap() { this.reproducirToquePaso(); }
 
     /**
-     * Sonido de "No ir / Fold" (descarte rápido de carta)
+     * Sonido de retirarse (fold)
      */
-    playFold() {
-        if (this.isMuted) return;
-        this.init();
-        if (!this.ctx) return;
+    reproducirRetirada() {
+        if (this.estaSilenciado) return;
+        this.iniciar();
+        if (!this.contexto) return;
 
-        const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
+        const ahora = this.contexto.currentTime;
+        const osc = this.contexto.createOscillator();
+        const ganancia = this.contexto.createGain();
 
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(350, now);
-        osc.frequency.exponentialRampToValueAtTime(80, now + 0.12);
+        osc.frequency.setValueAtTime(350, ahora);
+        osc.frequency.exponentialRampToValueAtTime(80, ahora + 0.12);
 
-        gain.gain.setValueAtTime(0.12, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        ganancia.gain.setValueAtTime(0.12, ahora);
+        ganancia.gain.exponentialRampToValueAtTime(0.001, ahora + 0.12);
 
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        osc.connect(ganancia);
+        ganancia.connect(this.contexto.destination);
 
-        osc.start(now);
-        osc.stop(now + 0.13);
+        osc.start(ahora);
+        osc.stop(ahora + 0.13);
     }
+    playFold() { this.reproducirRetirada(); }
 
     /**
-     * Sonido de alerta de turno
+     * Sonido de aviso de turno
      */
-    playTurnAlert() {
-        if (this.isMuted) return;
-        this.init();
-        if (!this.ctx) return;
+    reproducirAlertaTurno() {
+        if (this.estaSilenciado) return;
+        this.iniciar();
+        if (!this.contexto) return;
 
-        const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
+        const ahora = this.contexto.currentTime;
+        const osc = this.contexto.createOscillator();
+        const ganancia = this.contexto.createGain();
 
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(587.33, now); // D5
-        osc.frequency.setValueAtTime(880, now + 0.08); // A5
+        osc.frequency.setValueAtTime(587.33, ahora); // Re 5
+        osc.frequency.setValueAtTime(880, ahora + 0.08); // La 5
 
-        gain.gain.setValueAtTime(0.18, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+        ganancia.gain.setValueAtTime(0.18, ahora);
+        ganancia.gain.exponentialRampToValueAtTime(0.001, ahora + 0.22);
 
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        osc.connect(ganancia);
+        ganancia.connect(this.contexto.destination);
 
-        osc.start(now);
-        osc.stop(now + 0.23);
+        osc.start(ahora);
+        osc.stop(ahora + 0.23);
     }
+    playTurnAlert() { this.reproducirAlertaTurno(); }
 
     /**
-     * Sonido de All-in / Tensión
+     * Tensión de ir con todo (All-in)
      */
-    playAllIn() {
-        if (this.isMuted) return;
-        this.init();
-        if (!this.ctx) return;
+    reproducirTodoDentro() {
+        if (this.estaSilenciado) return;
+        this.iniciar();
+        if (!this.contexto) return;
 
-        const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
+        const ahora = this.contexto.currentTime;
+        const osc = this.contexto.createOscillator();
+        const ganancia = this.contexto.createGain();
 
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(220, now);
-        osc.frequency.linearRampToValueAtTime(520, now + 0.25);
+        osc.frequency.setValueAtTime(220, ahora);
+        osc.frequency.linearRampToValueAtTime(520, ahora + 0.25);
 
-        gain.gain.setValueAtTime(0.25, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        ganancia.gain.setValueAtTime(0.25, ahora);
+        ganancia.gain.exponentialRampToValueAtTime(0.001, ahora + 0.35);
 
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        osc.connect(ganancia);
+        ganancia.connect(this.contexto.destination);
 
-        osc.start(now);
-        osc.stop(now + 0.36);
+        osc.start(ahora);
+        osc.stop(ahora + 0.36);
     }
+    playAllIn() { this.reproducirTodoDentro(); }
 
     /**
-     * Fanfarria de victoria / recaudación de bote
+     * Fanfarria de bote ganado
      */
-    playWinFanfare() {
-        if (this.isMuted) return;
-        this.init();
-        if (!this.ctx) return;
+    reproducirFanfarriaVictoria() {
+        if (this.estaSilenciado) return;
+        this.iniciar();
+        if (!this.contexto) return;
 
-        const notes = [440, 554.37, 659.25, 880]; // A Major arpeggio
-        const now = this.ctx.currentTime;
+        const notas = [440, 554.37, 659.25, 880];
+        const ahora = this.contexto.currentTime;
 
-        notes.forEach((note, i) => {
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
+        notas.forEach((nota, i) => {
+            const osc = this.contexto.createOscillator();
+            const ganancia = this.contexto.createGain();
 
             osc.type = 'triangle';
-            osc.frequency.value = note;
+            osc.frequency.value = nota;
 
-            const startTime = now + i * 0.09;
-            const duration = i === notes.length - 1 ? 0.45 : 0.18;
+            const inicio = ahora + i * 0.09;
+            const duracion = i === notas.length - 1 ? 0.45 : 0.18;
 
-            gain.gain.setValueAtTime(0.2, startTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+            ganancia.gain.setValueAtTime(0.2, inicio);
+            ganancia.gain.exponentialRampToValueAtTime(0.001, inicio + duracion);
 
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
+            osc.connect(ganancia);
+            ganancia.connect(this.contexto.destination);
 
-            osc.start(startTime);
-            osc.stop(startTime + duration + 0.02);
+            osc.start(inicio);
+            osc.stop(inicio + duracion + 0.02);
         });
 
-        // Cascada de fichas después de la fanfarria
-        setTimeout(() => this.playChipClink(5), 380);
+        setTimeout(() => this.reproducirTintineoFichas(5), 380);
     }
+    playWinFanfare() { this.reproducirFanfarriaVictoria(); }
 }
 
-// Instancia global
-window.AudioFX = new SoundFX();
+// Instancia global en castellano y alias
+window.EfectosAudio = new EfectosSonido();
+window.AudioFX = window.EfectosAudio;
+window.SoundFX = EfectosSonido;

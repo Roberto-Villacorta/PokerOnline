@@ -1,41 +1,49 @@
 /**
- * Módulo de Red Multijugador Peer-to-Peer (WebRTC con PeerJS)
- * Permite partidas en tiempo real entre personas reales sin necesidad de un backend dedicado.
- * Compatible con despliegue en Vercel, Netlify o cualquier servidor estático.
+ * Módulo de Red Multijugador Punto a Punto (P2P con PeerJS / WebRTC) en Castellano
+ * Permite partidas en tiempo real entre personas reales sin servidores de pago.
  */
 
-class MultiplayerManager {
-    constructor(gameCallbacks) {
-        this.callbacks = gameCallbacks || {};
-        this.peer = null;
+class GestorMultijugador {
+    constructor(devolucionesLlamada) {
+        this.devolucionesLlamada = devolucionesLlamada || {};
+        this.callbacks = this.devolucionesLlamada; // Alias
+        this.par = null;
+        this.idPar = null;
         this.peerId = null;
+        this.esAnfitrion = false;
         this.isHost = false;
+        this.codigoSala = null;
         this.roomCode = null;
-        this.connections = new Map(); // peerId -> DataConnection (para Host)
-        this.hostConn = null; // DataConnection con el host (para Clientes)
-        this.myPlayerInfo = { id: null, name: 'Jugador', avatar: 'navy' };
-        this.connectedPlayers = []; // Lista de jugadores en la sala
+        this.conexiones = new Map();
+        this.connections = this.conexiones;
+        this.conexionAnfitrion = null;
+        this.hostConn = null;
+        this.miInfoJugador = { id: null, nombre: 'Jugador', avatar: 'navy' };
+        this.myPlayerInfo = this.miInfoJugador;
+        this.jugadoresConectados = [];
+        this.connectedPlayers = this.jugadoresConectados;
     }
 
     /**
-     * Genera un identificador de sala corto y fácil de compartir
+     * Genera un identificador de sala corto
      */
-    static generateRoomId() {
-        const num = Math.floor(1000 + Math.random() * 9000);
-        return `PKR-${num}`;
+    static generarIdSala() {
+        const numero = Math.floor(1000 + Math.random() * 9000);
+        return `PKR-${numero}`;
     }
+    static generateRoomId() { return GestorMultijugador.generarIdSala(); }
 
     /**
-     * Inicializa PeerJS con servidores STUN públicos y servidor de señalización de PeerJS
+     * Inicializa PeerJS con servidores públicos STUN
      */
-    initPeer(customId = null) {
-        return new Promise((resolve, reject) => {
+    iniciarPar(idPersonalizado = null) {
+        return new Promise((resolver, rechazar) => {
             if (typeof Peer === 'undefined') {
-                return reject(new Error('La librería PeerJS no está cargada.'));
+                return rechazar(new Error('La librería PeerJS no está disponible.'));
             }
 
             try {
-                this.peer = new Peer(customId, {
+                this.par = new Peer(idPersonalizado, {
                     debug: 1,
                     config: {
                         iceServers: [
@@ -45,96 +53,107 @@ class MultiplayerManager {
                         ]
                     }
                 });
+                this.peer = this.par;
 
-                this.peer.on('open', (id) => {
+                this.par.on('open', (id) => {
+                    this.idPar = id;
                     this.peerId = id;
-                    this.myPlayerInfo.id = id;
-                    resolve(id);
+                    this.miInfoJugador.id = id;
+                    resolver(id);
                 });
 
-                this.peer.on('error', (err) => {
-                    console.error('Error de PeerJS:', err);
-                    if (this.callbacks.onError) this.callbacks.onError(err);
+                this.par.on('error', (error) => {
+                    console.error('Error de conexión P2P:', error);
+                    if (this.devolucionesLlamada.onError) this.devolucionesLlamada.onError(error);
                 });
             } catch (e) {
-                reject(e);
+                rechazar(e);
             }
         });
     }
+    initPeer(customId) { return this.iniciarPar(customId); }
 
     /**
-     * Crea una nueva sala de Poker en la que este jugador actúa como Anfitrión (Host)
+     * Crea una sala nueva donde este jugador actúa como Anfitrión
      */
-    async createRoom(roomCode, hostPlayerInfo) {
+    async crearSala(codigoSala, infoAnfitrion) {
+        this.esAnfitrion = true;
         this.isHost = true;
-        this.roomCode = (roomCode || MultiplayerManager.generateRoomId()).toUpperCase().trim();
-        this.myPlayerInfo = { ...this.myPlayerInfo, ...hostPlayerInfo, isHost: true };
+        this.codigoSala = (codigoSala || GestorMultijugador.generarIdSala()).toUpperCase().trim();
+        this.roomCode = this.codigoSala;
+        this.miInfoJugador = { ...this.miInfoJugador, ...infoAnfitrion, esAnfitrion: true };
+        this.myPlayerInfo = this.miInfoJugador;
 
-        const hostPeerId = `poker-room-${this.roomCode.toLowerCase()}`;
-        await this.initPeer(hostPeerId);
+        const idParAnfitrion = `poker-room-${this.codigoSala.toLowerCase()}`;
+        await this.iniciarPar(idParAnfitrion);
 
-        // El host añade su propio jugador a la lista
-        this.connectedPlayers = [{
-            peerId: this.peerId,
-            id: this.peerId,
-            name: this.myPlayerInfo.name,
-            avatar: this.myPlayerInfo.avatar,
+        const primerJugador = {
+            peerId: this.idPar,
+            id: this.idPar,
+            nombre: this.miInfoJugador.nombre || this.miInfoJugador.name,
+            name: this.miInfoJugador.nombre || this.miInfoJugador.name,
+            avatar: this.miInfoJugador.avatar,
+            esAnfitrion: true,
             isHost: true,
-            chips: hostPlayerInfo.initialChips || 1000,
+            fichas: infoAnfitrion.fichasIniciales || infoAnfitrion.initialChips || 1000,
+            chips: infoAnfitrion.fichasIniciales || infoAnfitrion.initialChips || 1000,
+            asiento: 0,
             seat: 0
-        }];
+        };
 
-        // Escuchar conexiones de clientes entrantes
-        this.peer.on('connection', (conn) => {
-            this.handleIncomingConnection(conn);
+        this.jugadoresConectados = [primerJugador];
+        this.connectedPlayers = this.jugadoresConectados;
+
+        this.par.on('connection', (conexion) => {
+            this.gestionarConexionEntrante(conexion);
         });
 
         return {
-            roomCode: this.roomCode,
-            peerId: this.peerId,
-            shareUrl: `${window.location.origin}${window.location.pathname}?sala=${this.roomCode}`
+            codigoSala: this.codigoSala,
+            roomCode: this.codigoSala,
+            idPar: this.idPar,
+            peerId: this.idPar,
+            urlCompartir: `${window.location.origin}${window.location.pathname}?sala=${this.codigoSala}`
         };
     }
+    createRoom(roomCode, hostPlayerInfo) { return this.crearSala(roomCode, hostPlayerInfo); }
 
     /**
-     * Maneja un nuevo cliente que se conecta al Host
+     * Procesa una conexión entrante desde otro cliente
      */
-    handleIncomingConnection(conn) {
-        conn.on('open', () => {
-            this.connections.set(conn.peer, conn);
+    gestionarConexionEntrante(conexion) {
+        conexion.on('open', () => {
+            this.conexiones.set(conexion.peer, conexion);
 
-            conn.on('data', (data) => {
-                this.handleDataFromClient(conn.peer, data);
+            conexion.on('data', (datos) => {
+                this.gestionarDatosDeCliente(conexion.peer, datos);
             });
 
-            conn.on('close', () => {
-                this.handleClientDisconnect(conn.peer);
+            conexion.on('close', () => {
+                this.gestionarDesconexionCliente(conexion.peer);
             });
         });
     }
 
-    /**
-     * El anfitrión procesa mensajes recibidos de los clientes
-     */
-    handleDataFromClient(peerId, data) {
-        if (!data || !data.type) return;
+    gestionarDatosDeCliente(idPar, datos) {
+        if (!datos || !datos.type) return;
 
-        switch (data.type) {
+        switch (datos.type) {
             case 'JOIN_REQUEST':
-                this.processJoinRequest(peerId, data.payload);
+                this.procesarPeticionUnion(idPar, datos.payload);
                 break;
             case 'PLAYER_ACTION':
-                if (this.callbacks.onPlayerAction) {
-                    this.callbacks.onPlayerAction(peerId, data.payload);
+                if (this.devolucionesLlamada.onPlayerAction) {
+                    this.devolucionesLlamada.onPlayerAction(idPar, datos.payload);
                 }
                 break;
             case 'CHAT_MESSAGE':
-                this.broadcast({
+                this.emitirATodos({
                     type: 'CHAT_BROADCAST',
                     payload: {
-                        senderId: peerId,
-                        senderName: data.payload.senderName,
-                        text: data.payload.text,
+                        senderId: idPar,
+                        senderName: datos.payload.senderName,
+                        text: datos.payload.text,
                         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                     }
                 });
@@ -142,290 +161,273 @@ class MultiplayerManager {
         }
     }
 
-    /**
-     * El anfitrión valida y asigna asiento a un nuevo jugador
-     */
-    processJoinRequest(peerId, payload) {
-        const conn = this.connections.get(peerId);
-        if (!conn) return;
+    procesarPeticionUnion(idPar, carga) {
+        const conexion = this.conexiones.get(idPar);
+        if (!conexion) return;
 
-        if (this.connectedPlayers.length >= 6) {
-            conn.send({
+        if (this.jugadoresConectados.length >= 6) {
+            conexion.send({
                 type: 'JOIN_REJECTED',
                 payload: { reason: 'La mesa está completa (máximo 6 jugadores).' }
             });
             return;
         }
 
-        // Asignar primer asiento disponible
-        const occupiedSeats = this.connectedPlayers.map(p => p.seat);
-        let availableSeat = 0;
+        const asientosOcupados = this.jugadoresConectados.map(j => j.asiento);
+        let asientoDisponible = 0;
         for (let s = 0; s < 6; s++) {
-            if (!occupiedSeats.includes(s)) {
-                availableSeat = s;
+            if (!asientosOcupados.includes(s)) {
+                asientoDisponible = s;
                 break;
             }
         }
 
-        const newPlayer = {
-            peerId,
-            id: peerId,
-            name: payload.name || `Jugador ${this.connectedPlayers.length + 1}`,
-            avatar: payload.avatar || 'navy',
+        const nuevoJugador = {
+            peerId: idPar,
+            id: idPar,
+            nombre: carga.nombre || carga.name || `Jugador ${this.jugadoresConectados.length + 1}`,
+            name: carga.nombre || carga.name || `Jugador ${this.jugadoresConectados.length + 1}`,
+            avatar: carga.avatar || 'navy',
+            esAnfitrion: false,
             isHost: false,
-            chips: payload.initialChips || 1000,
-            seat: availableSeat
+            fichas: carga.fichasIniciales || carga.initialChips || 1000,
+            chips: carga.fichasIniciales || carga.initialChips || 1000,
+            asiento: asientoDisponible,
+            seat: asientoDisponible
         };
 
-        this.connectedPlayers.push(newPlayer);
+        this.jugadoresConectados.push(nuevoJugador);
+        this.connectedPlayers = this.jugadoresConectados;
 
-        // Aceptar al jugador y enviarle el estado actual
-        conn.send({
+        conexion.send({
             type: 'JOIN_ACCEPTED',
             payload: {
-                mySeat: availableSeat,
-                myId: peerId,
-                roomCode: this.roomCode,
-                players: this.connectedPlayers
+                mySeat: asientoDisponible,
+                myId: idPar,
+                roomCode: this.codigoSala,
+                players: this.jugadoresConectados
             }
         });
 
-        // Notificar a todos los demás jugadores
-        this.broadcast({
+        this.emitirATodos({
             type: 'PLAYER_JOINED',
             payload: {
-                player: newPlayer,
-                players: this.connectedPlayers
+                player: nuevoJugador,
+                players: this.jugadoresConectados
             }
         });
 
-        if (this.callbacks.onPlayerJoined) {
-            this.callbacks.onPlayerJoined(newPlayer);
+        if (this.devolucionesLlamada.onPlayerJoined) {
+            this.devolucionesLlamada.onPlayerJoined(nuevoJugador);
         }
     }
 
-    /**
-     * Maneja la desconexión de un jugador
-     */
-    handleClientDisconnect(peerId) {
-        const index = this.connectedPlayers.findIndex(p => p.peerId === peerId);
-        if (index !== -1) {
-            const disconnected = this.connectedPlayers[index];
-            this.connectedPlayers.splice(index, 1);
-            this.connections.delete(peerId);
+    gestionarDesconexionCliente(idPar) {
+        const indice = this.jugadoresConectados.findIndex(j => j.peerId === idPar);
+        if (indice !== -1) {
+            const desconectado = this.jugadoresConectados[indice];
+            this.jugadoresConectados.splice(indice, 1);
+            this.connectedPlayers = this.jugadoresConectados;
+            this.conexiones.delete(idPar);
 
-            this.broadcast({
+            this.emitirATodos({
                 type: 'PLAYER_LEFT',
                 payload: {
-                    peerId,
-                    name: disconnected.name,
-                    players: this.connectedPlayers
+                    peerId: idPar,
+                    name: desconectado.nombre || desconectado.name,
+                    players: this.jugadoresConectados
                 }
             });
 
-            if (this.callbacks.onPlayerLeft) {
-                this.callbacks.onPlayerLeft(disconnected);
+            if (this.devolucionesLlamada.onPlayerLeft) {
+                this.devolucionesLlamada.onPlayerLeft(desconectado);
             }
         }
     }
 
     /**
-     * Unirse a una sala existente como Cliente
+     * Unirse a una sala remota
      */
-    async joinRoom(roomCode, clientPlayerInfo) {
+    async unirseASala(codigoSala, infoCliente) {
+        this.esAnfitrion = false;
         this.isHost = false;
-        this.roomCode = roomCode.toUpperCase().trim();
-        this.myPlayerInfo = { ...this.myPlayerInfo, ...clientPlayerInfo };
+        this.codigoSala = codigoSala.toUpperCase().trim();
+        this.roomCode = this.codigoSala;
+        this.miInfoJugador = { ...this.miInfoJugador, ...infoCliente };
+        this.myPlayerInfo = this.miInfoJugador;
 
-        await this.initPeer();
+        await this.iniciarPar();
 
-        const hostPeerId = `poker-room-${this.roomCode.toLowerCase()}`;
-        return new Promise((resolve, reject) => {
-            const conn = this.peer.connect(hostPeerId, { reliable: true });
-            this.hostConn = conn;
+        const idParAnfitrion = `poker-room-${this.codigoSala.toLowerCase()}`;
+        return new Promise((resolver, rechazar) => {
+            const conexion = this.par.connect(idParAnfitrion, { reliable: true });
+            this.conexionAnfitrion = conexion;
+            this.hostConn = conexion;
 
-            const timeout = setTimeout(() => {
-                reject(new Error('Tiempo de espera agotado al conectar con la sala. Verifica que el código sea correcto y el anfitrión esté dentro.'));
+            const temporizador = setTimeout(() => {
+                rechazar(new Error('Tiempo de espera agotado. Verifica el código de mesa y que el anfitrión esté dentro.'));
             }, 10000);
 
-            conn.on('open', () => {
-                clearTimeout(timeout);
-                // Solicitar unirse a la partida
-                conn.send({
+            conexion.on('open', () => {
+                clearTimeout(temporizador);
+                conexion.send({
                     type: 'JOIN_REQUEST',
                     payload: {
-                        name: this.myPlayerInfo.name,
-                        avatar: this.myPlayerInfo.avatar,
-                        initialChips: this.myPlayerInfo.initialChips || 1000
+                        nombre: this.miInfoJugador.nombre || this.miInfoJugador.name,
+                        avatar: this.miInfoJugador.avatar,
+                        fichasIniciales: this.miInfoJugador.fichasIniciales || this.miInfoJugador.initialChips || 1000
                     }
                 });
             });
 
-            conn.on('data', (data) => {
-                if (data.type === 'JOIN_ACCEPTED') {
-                    this.myPlayerInfo.id = data.payload.myId;
-                    this.myPlayerInfo.seat = data.payload.mySeat;
-                    this.connectedPlayers = data.payload.players;
-                    resolve(data.payload);
-                } else if (data.type === 'JOIN_REJECTED') {
-                    reject(new Error(data.payload.reason || 'No fue posible unirse a la sala.'));
+            conexion.on('data', (datos) => {
+                if (datos.type === 'JOIN_ACCEPTED') {
+                    this.miInfoJugador.id = datos.payload.myId;
+                    this.miInfoJugador.asiento = datos.payload.mySeat;
+                    this.miInfoJugador.seat = datos.payload.mySeat;
+                    this.jugadoresConectados = datos.payload.players;
+                    this.connectedPlayers = this.jugadoresConectados;
+                    resolver(datos.payload);
+                } else if (datos.type === 'JOIN_REJECTED') {
+                    rechazar(new Error(datos.payload.reason || 'No se pudo unir a la mesa.'));
                 } else {
-                    this.handleDataFromHost(data);
+                    this.gestionarDatosDeAnfitrion(datos);
                 }
             });
 
-            conn.on('close', () => {
-                if (this.callbacks.onDisconnected) {
-                    this.callbacks.onDisconnected('La conexión con la sala se ha cerrado.');
+            conexion.on('close', () => {
+                if (this.devolucionesLlamada.onDisconnected) {
+                    this.devolucionesLlamada.onDisconnected('La conexión con la mesa ha finalizado.');
                 }
             });
 
-            conn.on('error', (err) => {
-                clearTimeout(timeout);
-                reject(err);
+            conexion.on('error', (err) => {
+                clearTimeout(temporizador);
+                rechazar(err);
             });
         });
     }
+    joinRoom(roomCode, clientInfo) { return this.unirseASala(roomCode, clientInfo); }
 
-    /**
-     * Procesa datos recibidos del Anfitrión (ejecutado en clientes)
-     */
-    handleDataFromHost(data) {
-        if (!data || !data.type) return;
+    gestionarDatosDeAnfitrion(datos) {
+        if (!datos || !datos.type) return;
 
-        switch (data.type) {
+        switch (datos.type) {
             case 'GAME_STATE_UPDATE':
-                if (this.callbacks.onGameStateUpdate) {
-                    this.callbacks.onGameStateUpdate(data.payload);
+                if (this.devolucionesLlamada.onGameStateUpdate) {
+                    this.devolucionesLlamada.onGameStateUpdate(datos.payload);
                 }
                 break;
             case 'PLAYER_JOINED':
-                this.connectedPlayers = data.payload.players;
-                if (this.callbacks.onPlayerJoined) {
-                    this.callbacks.onPlayerJoined(data.payload.player);
+                this.jugadoresConectados = datos.payload.players;
+                this.connectedPlayers = this.jugadoresConectados;
+                if (this.devolucionesLlamada.onPlayerJoined) {
+                    this.devolucionesLlamada.onPlayerJoined(datos.payload.player);
                 }
                 break;
             case 'PLAYER_LEFT':
-                this.connectedPlayers = data.payload.players;
-                if (this.callbacks.onPlayerLeft) {
-                    this.callbacks.onPlayerLeft(data.payload);
+                this.jugadoresConectados = datos.payload.players;
+                this.connectedPlayers = this.jugadoresConectados;
+                if (this.devolucionesLlamada.onPlayerLeft) {
+                    this.devolucionesLlamada.onPlayerLeft(datos.payload);
                 }
                 break;
             case 'PRIVATE_CARDS':
-                if (this.callbacks.onPrivateCards) {
-                    this.callbacks.onPrivateCards(data.payload.cards);
+                if (this.devolucionesLlamada.onPrivateCards) {
+                    this.devolucionesLlamada.onPrivateCards(datos.payload.cards);
                 }
                 break;
             case 'CHAT_BROADCAST':
-                if (this.callbacks.onChatMessage) {
-                    this.callbacks.onChatMessage(data.payload);
+                if (this.devolucionesLlamada.onChatMessage) {
+                    this.devolucionesLlamada.onChatMessage(datos.payload);
                 }
                 break;
             case 'ROUND_WINNERS':
-                if (this.callbacks.onRoundWinners) {
-                    this.callbacks.onRoundWinners(data.payload);
+                if (this.devolucionesLlamada.onRoundWinners) {
+                    this.devolucionesLlamada.onRoundWinners(datos.payload);
                 }
                 break;
         }
     }
 
-    /**
-     * Enviar acción del jugador (Fold, Check, Call, Raise)
-     */
-    sendAction(actionType, amount = 0) {
-        const payload = {
-            action: actionType,
-            amount: amount,
-            playerId: this.myPlayerInfo.id
+    enviarAccion(tipoAccion, cantidad = 0) {
+        const carga = {
+            action: tipoAccion,
+            tipoAccion: tipoAccion,
+            amount: cantidad,
+            cantidad: cantidad,
+            playerId: this.miInfoJugador.id
         };
 
-        if (this.isHost) {
-            if (this.callbacks.onPlayerAction) {
-                this.callbacks.onPlayerAction(this.peerId, payload);
+        if (this.esAnfitrion) {
+            if (this.devolucionesLlamada.onPlayerAction) {
+                this.devolucionesLlamada.onPlayerAction(this.idPar, carga);
             }
-        } else if (this.hostConn && this.hostConn.open) {
-            this.hostConn.send({
+        } else if (this.conexionAnfitrion && this.conexionAnfitrion.open) {
+            this.conexionAnfitrion.send({
                 type: 'PLAYER_ACTION',
-                payload
+                payload: carga
             });
         }
     }
+    sendAction(action, amount) { this.enviarAccion(action, amount); }
 
-    /**
-     * Enviar mensaje de chat
-     */
-    sendChat(text) {
-        if (!text || !text.trim()) return;
+    enviarChat(texto) {
+        if (!texto || !texto.trim()) return;
 
-        const payload = {
-            senderName: this.myPlayerInfo.name,
-            text: text.trim()
+        const carga = {
+            senderName: this.miInfoJugador.nombre || this.miInfoJugador.name,
+            text: texto.trim()
         };
 
-        if (this.isHost) {
-            this.broadcast({
+        if (this.esAnfitrion) {
+            this.emitirATodos({
                 type: 'CHAT_BROADCAST',
                 payload: {
-                    senderId: this.peerId,
-                    senderName: this.myPlayerInfo.name,
-                    text: text.trim(),
+                    senderId: this.idPar,
+                    senderName: carga.senderName,
+                    text: carga.text,
                     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 }
             });
-        } else if (this.hostConn && this.hostConn.open) {
-            this.hostConn.send({
+        } else if (this.conexionAnfitrion && this.conexionAnfitrion.open) {
+            this.conexionAnfitrion.send({
                 type: 'CHAT_MESSAGE',
-                payload
+                payload: carga
             });
         }
     }
+    sendChat(text) { this.enviarChat(text); }
 
-    /**
-     * El anfitrión envía datos confidenciales (como sus 2 cartas de mano) a un cliente específico
-     */
-    sendToPeer(peerId, message) {
-        if (peerId === this.peerId) {
-            // Es el propio host
-            this.handleDataFromHost(message);
+    enviarAPar(idPar, mensaje) {
+        if (idPar === this.idPar) {
+            this.gestionarDatosDeAnfitrion(mensaje);
             return;
         }
-        const conn = this.connections.get(peerId);
+        const conn = this.conexiones.get(idPar);
         if (conn && conn.open) {
-            conn.send(message);
+            conn.send(mensaje);
         }
     }
+    sendToPeer(peerId, msg) { this.enviarAPar(peerId, msg); }
 
-    /**
-     * El anfitrión emite un mensaje a todos los jugadores conectados
-     */
-    broadcast(message) {
-        if (!this.isHost) return;
-
-        // Auto-notificar al anfitrión
-        this.handleDataFromHost(message);
-
-        // Enviar a todos los clientes conectados
-        this.connections.forEach((conn) => {
-            if (conn.open) {
-                conn.send(message);
-            }
+    emitirATodos(mensaje) {
+        if (!this.esAnfitrion) return;
+        this.gestionarDatosDeAnfitrion(mensaje);
+        this.conexiones.forEach(conn => {
+            if (conn.open) conn.send(mensaje);
         });
     }
+    broadcast(msg) { this.emitirATodos(msg); }
 
-    /**
-     * Cierra todas las conexiones
-     */
-    destroy() {
-        if (this.hostConn) {
-            this.hostConn.close();
-        }
-        this.connections.forEach(conn => conn.close());
-        this.connections.clear();
-        if (this.peer) {
-            this.peer.destroy();
-        }
+    destruir() {
+        if (this.conexionAnfitrion) this.conexionAnfitrion.close();
+        this.conexiones.forEach(conn => conn.close());
+        this.conexiones.clear();
+        if (this.par) this.par.destroy();
     }
+    destroy() { this.destruir(); }
 }
 
-// Exportar globalmente
-window.MultiplayerManager = MultiplayerManager;
+window.GestorMultijugador = GestorMultijugador;
+window.MultiplayerManager = GestorMultijugador;
