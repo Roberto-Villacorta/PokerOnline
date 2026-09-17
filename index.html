@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Poker Texas Hold'em Online | Multijugador Real</title>
+    <meta name="description" content="Juego de Poker Texas Hold'em No-Limit online para jugar con amigos en tiempo real con salas P2P y mesa local. Sin registro ni descargas.">
+    
+    <!-- Fuentes de Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Favicon SVG con As de Picas -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♠</text></svg>">
+</head>
+<body>
+
+    <!-- BARRA SUPERIOR -->
+    <header class="top-bar">
+        <div class="brand">
+            <span class="brand-icon">♠</span>
+            <span class="brand-title">POKER ROYALE</span>
+        </div>
+
+        <div id="roomBadge" class="room-badge" style="display: none;" title="Haz clic para copiar el enlace de invitación">
+            <span>Mesa: <strong id="roomCodeDisplay">---</strong></span>
+            <span>🔗 Copiar</span>
+        </div>
+
+        <div class="top-controls">
+            <button id="btnSound" class="icon-btn" title="Activar/Desactivar sonido" aria-label="Sonido">
+                <span id="soundIcon">🔊</span>
+            </button>
+            <button id="btnRules" class="icon-btn" title="Reglas y Jerarquía de Manos" aria-label="Reglas">
+                <span>📖</span>
+            </button>
+            <button id="btnToggleChat" class="icon-btn" title="Abrir Chat" aria-label="Chat">
+                <span>💬</span>
+                <span id="unreadChatBadge" class="badge-count">1</span>
+            </button>
+            <button id="btnLeave" class="icon-btn" title="Salir de la mesa" aria-label="Salir">
+                <span>🚪</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- TAPETE Y VISTA DE JUEGO -->
+    <main class="game-viewport">
+        <div class="poker-table-wrap">
+            <div class="poker-table-outer">
+                <div class="poker-felt">
+                    <div class="felt-bet-line"></div>
+                    <div class="felt-logo">POKER ROYALE</div>
+
+                    <!-- ZONA COMUNITARIA CENTRAL -->
+                    <div class="community-zone">
+                        <div class="pot-container">
+                            <span class="pot-chips-icon">🪙</span>
+                            <span class="pot-label">Bote:</span>
+                            <span id="potAmount" class="pot-amount">$0</span>
+                        </div>
+
+                        <!-- 5 CARTAS COMUNITARIAS -->
+                        <div class="community-cards" id="communityCards">
+                            <div class="card-slot" id="slot-0"></div>
+                            <div class="card-slot" id="slot-1"></div>
+                            <div class="card-slot" id="slot-2"></div>
+                            <div class="card-slot" id="slot-3"></div>
+                            <div class="card-slot" id="slot-4"></div>
+                        </div>
+
+                        <div id="roundStatusBanner" class="round-status-banner">
+                            Esperando jugadores para comenzar la mano...
+                        </div>
+                    </div>
+
+                    <!-- BANNER DE PRESENTACIÓN DE GANADOR -->
+                    <div id="showdownBanner" class="showdown-banner">
+                        <div id="showdownWinnerName" class="showdown-winner-name">¡Jugador Ganador!</div>
+                        <div id="showdownHandName" class="showdown-hand-name">Escalera de Color</div>
+                        <div id="showdownPotWon" class="showdown-pot-won">+$1,450</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTENEDOR DE LOS 6 ASIENTOS -->
+            <div class="seats-container" id="seatsContainer">
+                <!-- Se inyectan dinámicamente o se renderizan para los 6 asientos -->
+                <div class="player-seat seat-0" id="seat-0"></div>
+                <div class="player-seat seat-1" id="seat-1"></div>
+                <div class="player-seat seat-2" id="seat-2"></div>
+                <div class="player-seat seat-3" id="seat-3"></div>
+                <div class="player-seat seat-4" id="seat-4"></div>
+                <div class="player-seat seat-5" id="seat-5"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- PANEL INFERIOR DE ACCIONES -->
+    <footer class="action-bar-wrap">
+        <div class="hand-advisor">
+            <div class="hand-advisor-text">
+                Mano: <span id="handAdvisorVal" class="hand-advisor-val">Esperando cartas</span>
+            </div>
+            <button id="btnTogglePrivacy" class="privacy-toggle-btn" title="Ocultar o mostrar tus cartas privadas">
+                <span id="privacyIcon">👁️</span>
+                <span id="privacyText">Ocultar Cartas</span>
+            </button>
+        </div>
+
+        <div class="action-controls">
+            <button id="btnFold" class="btn-action btn-fold" disabled>
+                <span>NO IR</span>
+                <span class="sub">Fold</span>
+            </button>
+
+            <button id="btnCheckCall" class="btn-action btn-check" disabled>
+                <span id="checkCallLabel">PASAR</span>
+                <span id="checkCallSub" class="sub">Check</span>
+            </button>
+
+            <div class="raise-control-group">
+                <button id="btnPresetMin" class="preset-btn">Min</button>
+                <button id="btnPreset2BB" class="preset-btn">2.5 BB</button>
+                <button id="btnPresetHalfPot" class="preset-btn">1/2 Bote</button>
+                <button id="btnPresetPot" class="preset-btn">Bote</button>
+                <button id="btnPresetAllIn" class="preset-btn">All-In</button>
+
+                <input type="range" id="raiseSlider" class="raise-slider" min="20" max="1000" step="10" value="40">
+            </div>
+
+            <button id="btnRaise" class="btn-action btn-raise" disabled>
+                <span>SUBIR</span>
+                <span id="raiseAmountLabel" class="sub">$40</span>
+            </button>
+        </div>
+    </footer>
+
+    <!-- DRAWER DE CHAT LATERAL -->
+    <aside id="chatDrawer" class="chat-drawer">
+        <div class="chat-header">
+            <span>💬 Chat de la Mesa</span>
+            <button id="btnCloseChat" class="icon-btn" style="width: 30px; height: 30px; font-size: 14px;">✕</button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-bubble">
+                <div class="sender">Crupier</div>
+                <div>¡Bienvenidos a la mesa! Pulsa un asiento o comparte el enlace para jugar.</div>
+            </div>
+        </div>
+
+        <div class="quick-reactions">
+            <button class="quick-reaction-btn" data-text="¡All-in!">🔥 All-in</button>
+            <button class="quick-reaction-btn" data-text="Buen farol 😉">😉 Buen farol</button>
+            <button class="quick-reaction-btn" data-text="¡Qué suerte!">🍀 Suerte</button>
+            <button class="quick-reaction-btn" data-text="Buena mano, GG">👏 GG</button>
+        </div>
+
+        <form id="chatForm" class="chat-input-row">
+            <input type="text" id="chatInput" class="chat-input" placeholder="Escribe un mensaje..." maxlength="100" autocomplete="off">
+            <button type="submit" class="icon-btn" style="width: 36px; height: 36px;">➤</button>
+        </form>
+    </aside>
+
+    <!-- MODAL DE LOBBY / ENTRADA AL JUEGO -->
+    <div id="lobbyModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>POKER ROYALE</h2>
+                <p>Texas Hold'em Online con Amigos</p>
+            </div>
+
+            <div class="lobby-tabs">
+                <button class="tab-btn active" id="tabCreate">Crear Sala</button>
+                <button class="tab-btn" id="tabJoin">Unirse a Sala</button>
+                <button class="tab-btn" id="tabLocal">Mesa Local</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Nombre del Jugador -->
+                <div class="form-group">
+                    <label for="playerNameInput">Tu Nombre</label>
+                    <input type="text" id="playerNameInput" class="form-input" placeholder="Ej. Roberto" maxlength="15" value="Jugador 1">
+                </div>
+
+                <!-- Selección de Avatar -->
+                <div class="form-group">
+                    <label>Elige tu Avatar</label>
+                    <div class="avatar-selector" id="avatarSelector">
+                        <div class="avatar-option selected" data-avatar="🦁">🦁</div>
+                        <div class="avatar-option" data-avatar="🐺">🐺</div>
+                        <div class="avatar-option" data-avatar="🦊">🦊</div>
+                        <div class="avatar-option" data-avatar="🐯">🐯</div>
+                        <div class="avatar-option" data-avatar="🦈">🦈</div>
+                        <div class="avatar-option" data-avatar="👑">👑</div>
+                    </div>
+                </div>
+
+                <!-- Campo dinámico según pestaña -->
+                <div id="createRoomOptions">
+                    <div class="form-group">
+                        <label for="initialChipsSelect">Fichas Iniciales</label>
+                        <select id="initialChipsSelect" class="form-input">
+                            <option value="500">500 Fichas (Rápida)</option>
+                            <option value="1000" selected>1,000 Fichas (Estándar)</option>
+                            <option value="2000">2,000 Fichas (Profunda)</option>
+                            <option value="5000">5,000 Fichas (High Roller)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="blindsSelect">Ciegas Iniciales (SB / BB)</label>
+                        <select id="blindsSelect" class="form-input">
+                            <option value="10/20" selected>10 / 20</option>
+                            <option value="25/50">25 / 50</option>
+                            <option value="50/100">50 / 100</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="joinRoomOptions" style="display: none;">
+                    <div class="form-group">
+                        <label for="roomCodeInput">Código de la Sala</label>
+                        <input type="text" id="roomCodeInput" class="form-input" placeholder="Ej. PKR-4821" maxlength="12" style="text-transform: uppercase;">
+                    </div>
+                </div>
+
+                <div id="localTableOptions" style="display: none;">
+                    <div class="form-group">
+                        <label for="localPlayersCount">Número de Jugadores Locales</label>
+                        <select id="localPlayersCount" class="form-input">
+                            <option value="2" selected>2 Jugadores (Cara a cara)</option>
+                            <option value="3">3 Jugadores</option>
+                            <option value="4">4 Jugadores</option>
+                            <option value="5">5 Jugadores</option>
+                            <option value="6">6 Jugadores (Mesa completa)</option>
+                        </select>
+                    </div>
+                    <p style="font-size: 12px; color: #94a3b8;">
+                        Ideal para jugar entre varios amigos en el mismo ordenador o tablet usando el botón "Ocultar Cartas" para turnarse.
+                    </p>
+                </div>
+
+                <button id="btnStartGame" class="btn-primary">
+                    CREAR MESA ONLINE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE REGLAS DE POKER -->
+    <div id="rulesModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card" style="max-width: 540px;">
+            <div class="modal-header">
+                <h2>JERARQUÍA DE MANOS</h2>
+                <p>De mayor a menor valor en Texas Hold'em</p>
+                <button id="btnCloseRules" class="icon-btn" style="position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; font-size: 14px;">✕</button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto; font-size: 13px; line-height: 1.5;">
+                <p><strong>1. Escalera Real:</strong> A, K, Q, J, 10 del mismo palo (La mano invencible).</p>
+                <p><strong>2. Escalera de Color:</strong> 5 cartas consecutivas del mismo palo (ej. 9♠ 8♠ 7♠ 6♠ 5♠).</p>
+                <p><strong>3. Póker:</strong> 4 cartas del mismo valor (ej. K♠ K♥ K♦ K♣ 4♦).</p>
+                <p><strong>4. Full House:</strong> 3 cartas iguales más una pareja (ej. J♦ J♠ J♥ 8♣ 8♦).</p>
+                <p><strong>5. Color:</strong> 5 cartas cualesquiera del mismo palo no consecutivas.</p>
+                <p><strong>6. Escalera:</strong> 5 cartas consecutivas de palos distintos (El As sirve como 14 o como 1 en A-2-3-4-5).</p>
+                <p><strong>7. Trío:</strong> 3 cartas del mismo valor.</p>
+                <p><strong>8. Doble Pareja:</strong> Dos parejas diferentes de cartas.</p>
+                <p><strong>9. Pareja:</strong> Dos cartas del mismo valor.</p>
+                <p><strong>10. Carta Alta:</strong> Si nadie tiene pareja o superior, gana la carta individual más alta.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENEDOR TOAST PARA NOTIFICACIONES -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- SCRIPTS -->
+    <!-- PeerJS para WebRTC P2P gratuito sin servidor de backend -->
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <script src="js/poker-evaluator.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/multiplayer.js"></script>
+    <script src="js/app.js"></script>
+
+</body>
+</html>
