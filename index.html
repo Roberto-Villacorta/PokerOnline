@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Poker Texas Hold'em Online | Multijugador Real</title>
-    <meta name="description" content="Juego de Poker Texas Hold'em No-Limit online para jugar con amigos en tiempo real con salas P2P y mesa local. Sin registro ni descargas.">
+    <meta name="description" content="Mesa de Poker Texas Hold'em No-Limit multijugador para jugar con amigos en tiempo real con salas y mesa local. Sin registro ni descargas.">
     
-    <!-- Fuentes de Google -->
+    <!-- Fuentes de Google: Serif clásico para casino y Sans legible para juego -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&display=swap" rel="stylesheet">
     
     <!-- Estilos -->
     <link rel="stylesheet" href="css/styles.css">
@@ -22,28 +22,56 @@
     <!-- BARRA SUPERIOR -->
     <header class="top-bar">
         <div class="brand">
-            <span class="brand-icon">♠</span>
-            <span class="brand-title">POKER ROYALE</span>
+            <span class="brand-suit">♠</span>
+            <div class="brand-text-block">
+                <span class="brand-title">POKER CLUB</span>
+                <span class="brand-subtitle">TEXAS HOLD'EM</span>
+            </div>
         </div>
 
         <div id="roomBadge" class="room-badge" style="display: none;" title="Haz clic para copiar el enlace de invitación">
-            <span>Mesa: <strong id="roomCodeDisplay">---</strong></span>
-            <span>🔗 Copiar</span>
+            <span class="room-indicator-dot"></span>
+            <span>Mesa <strong id="roomCodeDisplay">---</strong></span>
+            <span class="copy-hint">Copiar enlace</span>
         </div>
 
         <div class="top-controls">
+            <!-- Botón Sonido con SVG -->
             <button id="btnSound" class="icon-btn" title="Activar/Desactivar sonido" aria-label="Sonido">
-                <span id="soundIcon">🔊</span>
+                <svg id="soundIconOn" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>
+                <svg id="soundIconOff" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <line x1="23" y1="9" x2="17" y2="15"></line>
+                    <line x1="17" y1="9" x2="23" y2="15"></line>
+                </svg>
             </button>
-            <button id="btnRules" class="icon-btn" title="Reglas y Jerarquía de Manos" aria-label="Reglas">
-                <span>📖</span>
+
+            <!-- Botón Reglas con SVG -->
+            <button id="btnRules" class="icon-btn" title="Jerarquía de Manos" aria-label="Reglas">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
             </button>
+
+            <!-- Botón Chat con SVG -->
             <button id="btnToggleChat" class="icon-btn" title="Abrir Chat" aria-label="Chat">
-                <span>💬</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
                 <span id="unreadChatBadge" class="badge-count">1</span>
             </button>
-            <button id="btnLeave" class="icon-btn" title="Salir de la mesa" aria-label="Salir">
-                <span>🚪</span>
+
+            <!-- Botón Salir con SVG -->
+            <button id="btnLeave" class="icon-btn" title="Abandonar la mesa" aria-label="Salir">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
             </button>
         </div>
     </header>
@@ -53,14 +81,15 @@
         <div class="poker-table-wrap">
             <div class="poker-table-outer">
                 <div class="poker-felt">
+                    <div class="felt-texture-overlay"></div>
                     <div class="felt-bet-line"></div>
-                    <div class="felt-logo">POKER ROYALE</div>
+                    <div class="felt-watermark">POKER CLUB</div>
 
                     <!-- ZONA COMUNITARIA CENTRAL -->
                     <div class="community-zone">
                         <div class="pot-container">
-                            <span class="pot-chips-icon">🪙</span>
-                            <span class="pot-label">Bote:</span>
+                            <span class="pot-chip-disc"></span>
+                            <span class="pot-label">BOTE</span>
                             <span id="potAmount" class="pot-amount">$0</span>
                         </div>
 
@@ -80,7 +109,8 @@
 
                     <!-- BANNER DE PRESENTACIÓN DE GANADOR -->
                     <div id="showdownBanner" class="showdown-banner">
-                        <div id="showdownWinnerName" class="showdown-winner-name">¡Jugador Ganador!</div>
+                        <div class="showdown-ribbon">GANADOR DE LA MANO</div>
+                        <div id="showdownWinnerName" class="showdown-winner-name">Jugador 1</div>
                         <div id="showdownHandName" class="showdown-hand-name">Escalera de Color</div>
                         <div id="showdownPotWon" class="showdown-pot-won">+$1,450</div>
                     </div>
@@ -89,7 +119,6 @@
 
             <!-- CONTENEDOR DE LOS 6 ASIENTOS -->
             <div class="seats-container" id="seatsContainer">
-                <!-- Se inyectan dinámicamente o se renderizan para los 6 asientos -->
                 <div class="player-seat seat-0" id="seat-0"></div>
                 <div class="player-seat seat-1" id="seat-1"></div>
                 <div class="player-seat seat-2" id="seat-2"></div>
@@ -103,39 +132,44 @@
     <!-- PANEL INFERIOR DE ACCIONES -->
     <footer class="action-bar-wrap">
         <div class="hand-advisor">
-            <div class="hand-advisor-text">
-                Mano: <span id="handAdvisorVal" class="hand-advisor-val">Esperando cartas</span>
+            <div class="hand-advisor-info">
+                <span class="hand-advisor-label">Jugada:</span>
+                <span id="handAdvisorVal" class="hand-advisor-val">Esperando cartas</span>
             </div>
             <button id="btnTogglePrivacy" class="privacy-toggle-btn" title="Ocultar o mostrar tus cartas privadas">
-                <span id="privacyIcon">👁️</span>
-                <span id="privacyText">Ocultar Cartas</span>
+                <svg id="privacyEyeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <span id="privacyText">Ocultar cartas</span>
             </button>
         </div>
 
         <div class="action-controls">
             <button id="btnFold" class="btn-action btn-fold" disabled>
-                <span>NO IR</span>
-                <span class="sub">Fold</span>
+                <span class="main-label">NO IR</span>
+                <span class="sub-label">Fold</span>
             </button>
 
             <button id="btnCheckCall" class="btn-action btn-check" disabled>
-                <span id="checkCallLabel">PASAR</span>
-                <span id="checkCallSub" class="sub">Check</span>
+                <span id="checkCallLabel" class="main-label">PASAR</span>
+                <span id="checkCallSub" class="sub-label">Check</span>
             </button>
 
             <div class="raise-control-group">
-                <button id="btnPresetMin" class="preset-btn">Min</button>
-                <button id="btnPreset2BB" class="preset-btn">2.5 BB</button>
-                <button id="btnPresetHalfPot" class="preset-btn">1/2 Bote</button>
-                <button id="btnPresetPot" class="preset-btn">Bote</button>
-                <button id="btnPresetAllIn" class="preset-btn">All-In</button>
-
+                <div class="presets-row">
+                    <button id="btnPresetMin" class="preset-btn">Mín</button>
+                    <button id="btnPreset2BB" class="preset-btn">2.5 BB</button>
+                    <button id="btnPresetHalfPot" class="preset-btn">1/2 Bote</button>
+                    <button id="btnPresetPot" class="preset-btn">Bote</button>
+                    <button id="btnPresetAllIn" class="preset-btn">All-In</button>
+                </div>
                 <input type="range" id="raiseSlider" class="raise-slider" min="20" max="1000" step="10" value="40">
             </div>
 
             <button id="btnRaise" class="btn-action btn-raise" disabled>
-                <span>SUBIR</span>
-                <span id="raiseAmountLabel" class="sub">$40</span>
+                <span class="main-label">SUBIR</span>
+                <span id="raiseAmountLabel" class="sub-label">$40</span>
             </button>
         </div>
     </footer>
@@ -143,27 +177,38 @@
     <!-- DRAWER DE CHAT LATERAL -->
     <aside id="chatDrawer" class="chat-drawer">
         <div class="chat-header">
-            <span>💬 Chat de la Mesa</span>
-            <button id="btnCloseChat" class="icon-btn" style="width: 30px; height: 30px; font-size: 14px;">✕</button>
+            <span>Conversación de la Mesa</span>
+            <button id="btnCloseChat" class="icon-btn" style="width: 28px; height: 28px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
         </div>
 
         <div class="chat-messages" id="chatMessages">
-            <div class="chat-bubble">
-                <div class="sender">Crupier</div>
-                <div>¡Bienvenidos a la mesa! Pulsa un asiento o comparte el enlace para jugar.</div>
+            <div class="chat-bubble system">
+                <div class="sender">Mesa</div>
+                <div>Bienvenidos. Las apuestas se gestionan por turnos.</div>
             </div>
         </div>
 
         <div class="quick-reactions">
-            <button class="quick-reaction-btn" data-text="¡All-in!">🔥 All-in</button>
-            <button class="quick-reaction-btn" data-text="Buen farol 😉">😉 Buen farol</button>
-            <button class="quick-reaction-btn" data-text="¡Qué suerte!">🍀 Suerte</button>
-            <button class="quick-reaction-btn" data-text="Buena mano, GG">👏 GG</button>
+            <button class="quick-reaction-btn" data-text="All-in">All-in</button>
+            <button class="quick-reaction-btn" data-text="Buen farol">Buen farol</button>
+            <button class="quick-reaction-btn" data-text="Buena suerte">Buena suerte</button>
+            <button class="quick-reaction-btn" data-text="Bien jugado">Bien jugado</button>
+            <button class="quick-reaction-btn" data-text="Paso">Paso</button>
         </div>
 
         <form id="chatForm" class="chat-input-row">
-            <input type="text" id="chatInput" class="chat-input" placeholder="Escribe un mensaje..." maxlength="100" autocomplete="off">
-            <button type="submit" class="icon-btn" style="width: 36px; height: 36px;">➤</button>
+            <input type="text" id="chatInput" class="chat-input" placeholder="Escribir mensaje..." maxlength="100" autocomplete="off">
+            <button type="submit" class="icon-btn" style="width: 36px; height: 36px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
         </form>
     </aside>
 
@@ -171,8 +216,9 @@
     <div id="lobbyModal" class="modal-overlay">
         <div class="modal-card">
             <div class="modal-header">
-                <h2>POKER ROYALE</h2>
-                <p>Texas Hold'em Online con Amigos</p>
+                <span class="modal-subtitle-top">SALA DE POKER</span>
+                <h2>POKER CLUB</h2>
+                <p>Partida multijugador Texas Hold'em</p>
             </div>
 
             <div class="lobby-tabs">
@@ -184,32 +230,44 @@
             <div class="modal-body">
                 <!-- Nombre del Jugador -->
                 <div class="form-group">
-                    <label for="playerNameInput">Tu Nombre</label>
+                    <label for="playerNameInput">Tu Nombre o Alias</label>
                     <input type="text" id="playerNameInput" class="form-input" placeholder="Ej. Roberto" maxlength="15" value="Jugador 1">
                 </div>
 
-                <!-- Selección de Avatar -->
+                <!-- Selección de Avatar (Insignias de jugador elegantes con iniciales) -->
                 <div class="form-group">
-                    <label>Elige tu Avatar</label>
+                    <label>Estilo de Asiento</label>
                     <div class="avatar-selector" id="avatarSelector">
-                        <div class="avatar-option selected" data-avatar="🦁">🦁</div>
-                        <div class="avatar-option" data-avatar="🐺">🐺</div>
-                        <div class="avatar-option" data-avatar="🦊">🦊</div>
-                        <div class="avatar-option" data-avatar="🐯">🐯</div>
-                        <div class="avatar-option" data-avatar="🦈">🦈</div>
-                        <div class="avatar-option" data-avatar="👑">👑</div>
+                        <div class="avatar-option selected" data-avatar="navy" data-bg="#26384a" data-color="#e8edf3">
+                            <span class="avatar-preview-badge" style="background: #26384a;">AZ</span>
+                        </div>
+                        <div class="avatar-option" data-avatar="moss" data-bg="#273d2f" data-color="#e2eee6">
+                            <span class="avatar-preview-badge" style="background: #273d2f;">VE</span>
+                        </div>
+                        <div class="avatar-option" data-avatar="wine" data-bg="#4d242c" data-color="#fae8eb">
+                            <span class="avatar-preview-badge" style="background: #4d242c;">VI</span>
+                        </div>
+                        <div class="avatar-option" data-avatar="amber" data-bg="#4b3924" data-color="#faeee0">
+                            <span class="avatar-preview-badge" style="background: #4b3924;">AM</span>
+                        </div>
+                        <div class="avatar-option" data-avatar="slate" data-bg="#2d333b" data-color="#e6ebf1">
+                            <span class="avatar-preview-badge" style="background: #2d333b;">GR</span>
+                        </div>
+                        <div class="avatar-option" data-avatar="copper" data-bg="#3d2c29" data-color="#f5eae8">
+                            <span class="avatar-preview-badge" style="background: #3d2c29;">CO</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Campo dinámico según pestaña -->
+                <!-- Opciones Crear Sala -->
                 <div id="createRoomOptions">
                     <div class="form-group">
                         <label for="initialChipsSelect">Fichas Iniciales</label>
                         <select id="initialChipsSelect" class="form-input">
-                            <option value="500">500 Fichas (Rápida)</option>
+                            <option value="500">500 Fichas (Corta)</option>
                             <option value="1000" selected>1,000 Fichas (Estándar)</option>
                             <option value="2000">2,000 Fichas (Profunda)</option>
-                            <option value="5000">5,000 Fichas (High Roller)</option>
+                            <option value="5000">5,000 Fichas (Larga)</option>
                         </select>
                     </div>
 
@@ -223,31 +281,33 @@
                     </div>
                 </div>
 
+                <!-- Opciones Unirse a Sala -->
                 <div id="joinRoomOptions" style="display: none;">
                     <div class="form-group">
-                        <label for="roomCodeInput">Código de la Sala</label>
+                        <label for="roomCodeInput">Código de la Mesa</label>
                         <input type="text" id="roomCodeInput" class="form-input" placeholder="Ej. PKR-4821" maxlength="12" style="text-transform: uppercase;">
                     </div>
                 </div>
 
+                <!-- Opciones Mesa Local -->
                 <div id="localTableOptions" style="display: none;">
                     <div class="form-group">
-                        <label for="localPlayersCount">Número de Jugadores Locales</label>
+                        <label for="localPlayersCount">Jugadores en la Mesa</label>
                         <select id="localPlayersCount" class="form-input">
-                            <option value="2" selected>2 Jugadores (Cara a cara)</option>
+                            <option value="2" selected>2 Jugadores (Mano a mano)</option>
                             <option value="3">3 Jugadores</option>
                             <option value="4">4 Jugadores</option>
                             <option value="5">5 Jugadores</option>
                             <option value="6">6 Jugadores (Mesa completa)</option>
                         </select>
                     </div>
-                    <p style="font-size: 12px; color: #94a3b8;">
-                        Ideal para jugar entre varios amigos en el mismo ordenador o tablet usando el botón "Ocultar Cartas" para turnarse.
+                    <p class="modal-notice-text">
+                        Para jugar con amigos compartiendo la misma pantalla u ordenador. Cada jugador puede usar "Ocultar cartas" para pasarse el turno con discreción.
                     </p>
                 </div>
 
                 <button id="btnStartGame" class="btn-primary">
-                    CREAR MESA ONLINE
+                    CREAR MESA
                 </button>
             </div>
         </div>
@@ -255,23 +315,29 @@
 
     <!-- MODAL DE REGLAS DE POKER -->
     <div id="rulesModal" class="modal-overlay" style="display: none;">
-        <div class="modal-card" style="max-width: 540px;">
+        <div class="modal-card" style="max-width: 520px;">
             <div class="modal-header">
+                <span class="modal-subtitle-top">REGLAMENTO OFICIAL</span>
                 <h2>JERARQUÍA DE MANOS</h2>
-                <p>De mayor a menor valor en Texas Hold'em</p>
-                <button id="btnCloseRules" class="icon-btn" style="position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; font-size: 14px;">✕</button>
+                <p>Clasificación de mayor a menor valor</p>
+                <button id="btnCloseRules" class="icon-btn" style="position: absolute; top: 16px; right: 16px; width: 32px; height: 32px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
             </div>
-            <div class="modal-body" style="max-height: 70vh; overflow-y: auto; font-size: 13px; line-height: 1.5;">
-                <p><strong>1. Escalera Real:</strong> A, K, Q, J, 10 del mismo palo (La mano invencible).</p>
-                <p><strong>2. Escalera de Color:</strong> 5 cartas consecutivas del mismo palo (ej. 9♠ 8♠ 7♠ 6♠ 5♠).</p>
-                <p><strong>3. Póker:</strong> 4 cartas del mismo valor (ej. K♠ K♥ K♦ K♣ 4♦).</p>
-                <p><strong>4. Full House:</strong> 3 cartas iguales más una pareja (ej. J♦ J♠ J♥ 8♣ 8♦).</p>
-                <p><strong>5. Color:</strong> 5 cartas cualesquiera del mismo palo no consecutivas.</p>
-                <p><strong>6. Escalera:</strong> 5 cartas consecutivas de palos distintos (El As sirve como 14 o como 1 en A-2-3-4-5).</p>
-                <p><strong>7. Trío:</strong> 3 cartas del mismo valor.</p>
-                <p><strong>8. Doble Pareja:</strong> Dos parejas diferentes de cartas.</p>
-                <p><strong>9. Pareja:</strong> Dos cartas del mismo valor.</p>
-                <p><strong>10. Carta Alta:</strong> Si nadie tiene pareja o superior, gana la carta individual más alta.</p>
+            <div class="modal-body rules-list-body">
+                <div class="rule-item"><strong>1. Escalera Real:</strong> A, K, Q, J, 10 del mismo palo. La jugada más alta.</div>
+                <div class="rule-item"><strong>2. Escalera de Color:</strong> 5 cartas consecutivas del mismo palo (ej. 9♠ 8♠ 7♠ 6♠ 5♠).</div>
+                <div class="rule-item"><strong>3. Póker:</strong> 4 cartas del mismo valor (ej. K♠ K♥ K♦ K♣ 4♦).</div>
+                <div class="rule-item"><strong>4. Full House:</strong> Un trío combinado con una pareja (ej. J♦ J♠ J♥ 8♣ 8♦).</div>
+                <div class="rule-item"><strong>5. Color:</strong> 5 cartas cualesquiera del mismo palo no consecutivas.</div>
+                <div class="rule-item"><strong>6. Escalera:</strong> 5 cartas consecutivas de palos variados (El As cuenta como 14 o como 1).</div>
+                <div class="rule-item"><strong>7. Trío:</strong> 3 cartas del mismo valor.</div>
+                <div class="rule-item"><strong>8. Doble Pareja:</strong> Dos parejas distintas de cartas.</div>
+                <div class="rule-item"><strong>9. Pareja:</strong> Dos cartas de idéntico valor.</div>
+                <div class="rule-item"><strong>10. Carta Alta:</strong> En ausencia de combinación, define la carta individual superior.</div>
             </div>
         </div>
     </div>
@@ -280,7 +346,6 @@
     <div id="toastContainer" class="toast-container"></div>
 
     <!-- SCRIPTS -->
-    <!-- PeerJS para WebRTC P2P gratuito sin servidor de backend -->
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <script src="js/poker-evaluator.js"></script>
     <script src="js/audio.js"></script>

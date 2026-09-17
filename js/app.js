@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         minRaise: 20,
         smallBlind: 10,
         bigBlind: 20,
-        initialChips: 1000,
+        initialChips: 3000,
         privacyHidden: false,
         myHoleCards: [],
         lastAggressorSeat: null,
@@ -119,10 +119,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
+    // PALETA HUMANIZADA Y UTILIDADES DE AVATAR
+    // ==========================================
+    const AVATAR_PALETTE = {
+        'navy': { bg: '#26384a', color: '#e8edf3' },
+        'moss': { bg: '#273d2f', color: '#e2eee6' },
+        'wine': { bg: '#4d242c', color: '#fae8eb' },
+        'amber': { bg: '#4b3924', color: '#faeee0' },
+        'slate': { bg: '#2d333b', color: '#e6ebf1' },
+        'copper': { bg: '#3d2c29', color: '#f5eae8' }
+    };
+    const PALETTE_KEYS = ['navy', 'moss', 'wine', 'amber', 'slate', 'copper'];
+
+    function getInitials(name) {
+        if (!name) return 'J';
+        const parts = name.trim().split(/\s+/);
+        if (parts.length >= 2) {
+            return (parts[0][0] + parts[1][0]).toUpperCase();
+        }
+        return name.substring(0, 2).toUpperCase();
+    }
+
+    // ==========================================
     // GESTIÓN DEL LOBBY Y PESTAÑAS
     // ==========================================
     let selectedTab = 'create';
-    let selectedAvatar = '🦁';
+    let selectedAvatar = 'navy';
 
     // Manejo de parámetros en la URL (ej. ?sala=PKR-1234)
     const urlParams = new URLSearchParams(window.location.search);
@@ -158,13 +180,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Selector de avatares
+    // Selector de insignias de asiento
     UI.avatarSelector.addEventListener('click', (e) => {
         const opt = e.target.closest('.avatar-option');
         if (opt) {
             document.querySelectorAll('.avatar-option').forEach(a => a.classList.remove('selected'));
             opt.classList.add('selected');
-            selectedAvatar = opt.dataset.avatar;
+            selectedAvatar = opt.dataset.avatar || 'navy';
         }
     });
 
@@ -201,20 +223,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. ANFITRIÓN ONLINE (P2P Host)
     async function startOnlineHost(name, avatar, chips) {
         UI.btnStartGame.disabled = true;
-        UI.btnStartGame.textContent = 'Creando sala P2P...';
+        UI.btnStartGame.textContent = 'Creando mesa...';
 
         multiplayer = new MultiplayerManager({
             onPlayerJoined: (player) => {
-                showToast(`🎉 ${player.name} se ha sentado en la mesa`);
-                addChatMessage('Sistema', `${player.name} se ha unido a la mesa.`);
+                showToast(`${player.name} se ha sentado en la mesa`);
+                addChatMessage('Mesa', `${player.name} se ha incorporado.`);
                 window.AudioFX.playCardDeal();
                 renderTable();
                 broadcastState();
                 checkAutoStartHand();
             },
             onPlayerLeft: (player) => {
-                showToast(`🚪 ${player.name} ha abandonado la mesa`);
-                addChatMessage('Sistema', `${player.name} ha salido de la mesa.`);
+                showToast(`${player.name} ha dejado su asiento`);
+                addChatMessage('Mesa', `${player.name} ha salido.`);
                 renderTable();
                 broadcastState();
             },
@@ -262,13 +284,13 @@ document.addEventListener('DOMContentLoaded', () => {
             setupRoomUI(roomInfo.roomCode);
             UI.lobbyModal.style.display = 'none';
             renderTable();
-            showToast(`¡Sala ${roomInfo.roomCode} creada! Comparte el enlace con tus amigos.`);
-            addChatMessage('Crupier', `Mesa creada. Código: ${roomInfo.roomCode}. Esperando a que se unan más jugadores.`);
+            showToast(`Mesa ${roomInfo.roomCode} lista.`);
+            addChatMessage('Mesa', `Mesa creada. Código: ${roomInfo.roomCode}. Esperando jugadores.`);
         } catch (err) {
             console.error(err);
-            showToast('No se pudo crear la sala. Revisa tu conexión a internet.');
+            showToast('No se pudo crear la sala. Revisa la conexión.');
             UI.btnStartGame.disabled = false;
-            UI.btnStartGame.textContent = 'CREAR MESA ONLINE';
+            UI.btnStartGame.textContent = 'CREAR MESA';
         }
     }
 
@@ -319,8 +341,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             setupRoomUI(joinResult.roomCode);
             UI.lobbyModal.style.display = 'none';
-            showToast(`¡Conectado a la mesa ${joinResult.roomCode}!`);
-            addChatMessage('Crupier', `Te has unido como ${name}.`);
+            showToast(`Conectado a la mesa ${joinResult.roomCode}.`);
+            addChatMessage('Mesa', `Te has unido como ${name}.`);
         } catch (err) {
             console.error(err);
             showToast(err.message || 'Error al conectar con la sala.');
@@ -335,14 +357,14 @@ document.addEventListener('DOMContentLoaded', () => {
         gameState.roomCode = 'MESA-LOCAL';
         gameState.mySeat = 0;
 
-        const defaultAvatars = ['🦁', '🐺', '🦊', '🐯', '🦈', '👑'];
         gameState.players = [];
 
         for (let i = 0; i < playerCount; i++) {
+            const paletteKey = PALETTE_KEYS[i % PALETTE_KEYS.length];
             gameState.players.push({
                 id: `local-player-${i}`,
                 name: i === 0 ? hostName : `Jugador ${i + 1}`,
-                avatar: i === 0 ? hostAvatar : defaultAvatars[i % defaultAvatars.length],
+                avatar: i === 0 ? hostAvatar : paletteKey,
                 chips: chips,
                 seat: i,
                 holeCards: [],
@@ -361,8 +383,8 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.lobbyModal.style.display = 'none';
 
         renderTable();
-        showToast('¡Mesa local iniciada! Usa "Ocultar Cartas" para pasarte el dispositivo.');
-        addChatMessage('Crupier', 'Mesa local lista. Repartiendo primera mano...');
+        showToast('Mesa local lista. Usa "Ocultar cartas" para pasarte el turno.');
+        addChatMessage('Mesa', 'Mesa local iniciada. Repartiendo cartas...');
 
         setTimeout(() => {
             startNewHand();
@@ -376,9 +398,9 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.roomBadge.addEventListener('click', () => {
             const shareUrl = `${window.location.origin}${window.location.pathname}?sala=${code}`;
             navigator.clipboard.writeText(shareUrl).then(() => {
-                showToast('📋 ¡Enlace copiado al portapapeles! Pásaselo a tus amigos.');
+                showToast('Enlace copiado al portapapeles.');
             }).catch(() => {
-                showToast(`Código de sala: ${code}`);
+                showToast(`Código de mesa: ${code}`);
             });
         });
     }
@@ -760,7 +782,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayShowdownWinners(payload) {
-        UI.showdownWinnerName.textContent = `🏆 ¡${payload.winnerName}!`;
+        UI.showdownWinnerName.textContent = payload.winnerName;
         UI.showdownHandName.textContent = payload.handDesc;
         UI.showdownPotWon.textContent = `+$${payload.potWon}`;
         UI.showdownBanner.style.display = 'block';
@@ -892,7 +914,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const avatar = document.createElement('div');
             avatar.className = 'player-avatar';
-            avatar.textContent = player.avatar || '😎';
+            const initials = getInitials(player.name);
+            const style = AVATAR_PALETTE[player.avatar] || AVATAR_PALETTE[PALETTE_KEYS[player.seat % PALETTE_KEYS.length]] || { bg: '#26384a', color: '#e8edf3' };
+            avatar.style.background = style.bg;
+            avatar.style.color = style.color;
+            avatar.textContent = initials;
             avatarWrap.appendChild(avatar);
 
             if (player.seat === gameState.dealerSeat) {
@@ -914,7 +940,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const chips = document.createElement('div');
             chips.className = 'player-chips';
-            chips.innerHTML = `<span>🪙</span> <span>$${player.chips.toLocaleString()}</span>`;
+            chips.innerHTML = `<span class="pot-chip-disc" style="width: 9px; height: 9px;"></span> <span>$${player.chips.toLocaleString()}</span>`;
             info.appendChild(chips);
 
             playerBox.appendChild(info);
@@ -966,7 +992,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const betElem = document.createElement('div');
                 betElem.className = 'seat-bet';
                 betElem.style.display = 'flex';
-                betElem.innerHTML = `<span>🪙</span> <span>$${player.currentRoundBet}</span>`;
+                betElem.innerHTML = `<span class="pot-chip-disc" style="width: 8px; height: 8px;"></span> <span>$${player.currentRoundBet}</span>`;
                 seatElem.appendChild(betElem);
             }
         }
@@ -1147,12 +1173,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Botón de Privacidad (Ocultar/Mostrar mis cartas)
     UI.btnTogglePrivacy.addEventListener('click', () => {
         gameState.privacyHidden = !gameState.privacyHidden;
-        if (gameState.privacyHidden) {
-            UI.privacyIcon.textContent = '🙈';
-            UI.privacyText.textContent = 'Ver Cartas';
-        } else {
-            UI.privacyIcon.textContent = '👁️';
-            UI.privacyText.textContent = 'Ocultar Cartas';
+        const textElem = document.getElementById('privacyText');
+        if (textElem) {
+            textElem.textContent = gameState.privacyHidden ? 'Mostrar cartas' : 'Ocultar cartas';
         }
         renderTable();
     });
@@ -1224,7 +1247,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     UI.btnSound.addEventListener('click', () => {
         const isMuted = window.AudioFX.toggleMute();
-        UI.soundIcon.textContent = isMuted ? '🔇' : '🔊';
+        const soundOn = document.getElementById('soundIconOn');
+        const soundOff = document.getElementById('soundIconOff');
+        if (soundOn && soundOff) {
+            soundOn.style.display = isMuted ? 'none' : 'block';
+            soundOff.style.display = isMuted ? 'block' : 'none';
+        }
         showToast(isMuted ? 'Sonido silenciado' : 'Sonido activado');
     });
 

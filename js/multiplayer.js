@@ -13,7 +13,7 @@ class MultiplayerManager {
         this.roomCode = null;
         this.connections = new Map(); // peerId -> DataConnection (para Host)
         this.hostConn = null; // DataConnection con el host (para Clientes)
-        this.myPlayerInfo = { id: null, name: 'Jugador', avatar: '🦁' };
+        this.myPlayerInfo = { id: null, name: 'Jugador', avatar: 'navy' };
         this.connectedPlayers = []; // Lista de jugadores en la sala
     }
 
@@ -171,7 +171,7 @@ class MultiplayerManager {
             peerId,
             id: peerId,
             name: payload.name || `Jugador ${this.connectedPlayers.length + 1}`,
-            avatar: payload.avatar || '😎',
+            avatar: payload.avatar || 'navy',
             isHost: false,
             chips: payload.initialChips || 1000,
             seat: availableSeat
