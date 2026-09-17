@@ -1,57 +1,64 @@
-# ♠ POKER ROYALE - Texas Hold'em Online Multijugador
+# Poker Club — Texas Hold'em en Línea
 
-Aplicación web de **Poker Texas Hold'em No-Limit 100% multijugador exclusivo para personas reales** (sin bots), con gráficos de casino de lujo, motor oficial de evaluación de manos, chat en vivo y sonido sintetizado mediante Web Audio API.
+Una mesa de Poker Texas Hold'em (No-Limit) pensada para jugar directamente entre personas a través del navegador, sin registros obligatorios, sin bots y sin necesidad de instalar nada.
 
-Listo para ser desplegado en **Vercel** en 1 minuto sin servidores dedicados ni bases de datos de pago.
+El proyecto está diseñado como una aplicación web estática optimizada para desplegarse de forma gratuita e inmediata en Vercel, aprovechando WebRTC (PeerJS) para conectar a los jugadores entre sí en tiempo real.
 
 ---
 
-## 🚀 Cómo Desplegar en Vercel
+## Modos de Juego
 
-### Opción 1: Despliegue Directo con GitHub (Recomendado)
-1. Sube esta carpeta a un repositorio en tu cuenta de [GitHub](https://github.com/):
+### 1. Mesa en Línea (Multijugador P2P)
+- Un jugador abre la web, pulsa en **Crear Sala** y elige las fichas iniciales y ciegas.
+- La aplicación genera un código de mesa (por ejemplo, `PKR-4821`) y un enlace directo.
+- Al compartir ese enlace con amigos, estos entran desde su ordenador o móvil, eligen su nombre o iniciales y toman asiento.
+- **Privacidad de mano**: cada jugador recibe exclusivamente sus dos cartas privadas en su dispositivo; las cartas comunitarias (Flop, Turn, River) y las apuestas se sincronizan de forma pública en la mesa.
+
+### 2. Mesa Local (Pase y Juegue)
+- Pensada para jugar entre 2 y 6 amigos compartiendo la misma pantalla (portátil, ordenador de clase o tablet).
+- Cada jugador dispone del botón **Ocultar cartas** para consultar su mano en privado y ceder el turno al siguiente jugador con total discreción.
+
+---
+
+## Aspectos Técnicos
+
+- **Motor de Reglas Texas Hold'em**: evaluación reglamentaria de 7 cartas ($C(7, 5)$) que contempla todas las jugadas oficiales (Escalera Real, Escalera de Color, Póker, Full House, Color, Escalera con As alto o bajo, Trío, Doble Pareja, Pareja y Carta Alta). Resuelve desempates por cartas de apoyo (*kickers*), botes secundarios (*side pots*) por situaciones de All-In y botes divididos (*split pots*).
+- **Sonido Sintetizado con Web Audio API**: todos los efectos de mesa (deslizamiento de cartas, toque de fichas de arcilla, pasar en el paño y avisos de turno) se generan mediante síntesis de ondas directamente en el navegador, evitando llamadas a archivos externos que puedan causar demoras o errores 404.
+- **Diseño Sobrio y Clásico**: estética inspirada en paño de casino tradicional, cuero oscuro acolchado, cartas satinadas de tono hueso y tipografía serif editorial, prescindiendo de estridencias visuales o figuras artificiales.
+- **Comunicación en Mesa**: sistema de conversación discreto con expresiones habituales de mesa real (*All-in*, *Buen farol*, *Buena suerte*, *Bien jugado*, *Paso*).
+
+---
+
+## Cómo Desplegar en Vercel
+
+Al tratarse de una arquitectura cliente basada en WebRTC, no se requiere ningún servidor de base de datos ni backend de pago.
+
+### Opción A: A través de GitHub (Recomendado)
+1. Haz un fork o sube este repositorio a tu cuenta de GitHub:
    ```bash
-   git init
-   git add .
-   git commit -m "Initial commit - Poker Royale"
+   git remote add origin https://github.com/Roberto-Villacorta/PokerOnline.git
    git branch -M main
-   git remote add origin https://github.com/TU_USUARIO/TU_REPOSITORIO.git
    git push -u origin main
    ```
-2. Entra en [vercel.com](https://vercel.com/) e inicia sesión con tu cuenta de GitHub.
-3. Haz clic en **"Add New..."** > **"Project"**.
-4. Selecciona tu repositorio de Poker e impórtalo.
-5. Haz clic en **"Deploy"** (no requiere configurar variables de entorno ni comandos de build, ya está todo preconfigurado en `vercel.json`).
-6. ¡Listo! Vercel te proporcionará una URL pública como `https://tu-poker.vercel.app`.
+2. Inicia sesión en [Vercel](https://vercel.com/) con tu cuenta de GitHub.
+3. Haz clic en **Add New...** > **Project** y selecciona el repositorio **PokerOnline**.
+4. Haz clic en **Deploy**. El archivo `vercel.json` ya incluye las cabeceras de caché estática y seguridad necesarias, por lo que el despliegue tardará apenas unos segundos.
 
-### Opción 2: Despliegue con Vercel CLI
-Si tienes la herramienta de comandos de Vercel instalada:
+### Opción B: Usando la interfaz de comandos (Vercel CLI)
+Desde la raíz del proyecto, ejecuta en la terminal:
 ```bash
 vercel
 ```
-Sigue las indicaciones de pantalla y el proyecto quedará publicado al instante.
+Sigue las indicaciones del asistente para asociarlo a tu cuenta y el sitio quedará publicado al instante con una URL pública accesible desde cualquier dispositivo.
 
 ---
 
-## 🎮 Modos de Juego
+## Ejecución Local para Desarrollo
 
-### 1. Sala Online Multijugador (P2P con WebRTC)
-- Un jugador pulsa **"Crear Sala"**, elige la cantidad de fichas y ciegas.
-- Se genera un código único (ej. `PKR-4821`) y un enlace directo para compartir.
-- Los amigos abren el enlace desde su teléfono móvil u ordenador, eligen su nombre/avatar y se sientan en la mesa.
-- **Privacidad Total**: Las cartas privadas de cada jugador se envían de forma encriptada y exclusiva a su pantalla.
+Si deseas probar o modificar el código localmente, puedes servir los archivos con cualquier servidor HTTP estático, por ejemplo con Python:
 
-### 2. Mesa Local (Pase y Juegue / Misma Pantalla)
-- Ideal para jugar con amigos físicamente juntos en una misma tablet, portátil o PC de clase.
-- Permite de 2 a 6 jugadores humanos.
-- Cuenta con el botón **"Ocultar Cartas"** para que cada jugador pueda mirar su mano y pasar el dispositivo al siguiente sin que nadie más la vea.
+```bash
+python -m http.server 3000
+```
 
----
-
-## 🃏 Características Técnicas
-
-- **Evaluador Oficial Texas Hold'em**: Soporta combinaciones de 7 cartas con evaluación de Escalera Real, Escalera de Color, Póker, Full House, Color, Escalera (con As alto y bajo A-2-3-4-5), Trío, Doble Pareja, Pareja y Carta Alta, con desempates por *kickers* y reparto de botes divididos (*split pots*).
-- **Web Audio API**: Efectos de sonido puros (reparto de cartas, tintineo de fichas, pasar en la mesa, alerta de turno y fanfarria de victoria) generados matemáticamente sin depender de archivos de audio externos.
-- **Chat en Vivo**: Mensajes y reacciones rápidas para interactuar con los rivales.
-- **Asistente de Mano en Tiempo Real**: Te indica la jugada que tienes conformada en cada fase de la ronda.
-- **Diseño Responsive de Casino**: Adaptado para jugar horizontal y verticalmente en smartphones, tablets y pantallas de sobremesa.
+Y abrir en tu navegador `http://localhost:3000`.
