@@ -24,8 +24,8 @@
         <div class="brand">
             <span class="brand-suit">♠</span>
             <div class="brand-text-block">
-                <span class="brand-title">POKER CLUB</span>
-                <span class="brand-subtitle">TEXAS HOLD'EM</span>
+                <span class="brand-title">CLUB DE PÓQUER</span>
+                <span class="brand-subtitle">PÓQUER TEXAS HOLD'EM</span>
             </div>
         </div>
 
@@ -83,7 +83,7 @@
                 <div class="poker-felt">
                     <div class="felt-texture-overlay"></div>
                     <div class="felt-bet-line"></div>
-                    <div class="felt-watermark">POKER CLUB</div>
+                    <div class="felt-watermark">CLUB DE PÓQUER</div>
 
                     <!-- ZONA COMUNITARIA CENTRAL -->
                     <div class="community-zone">
@@ -148,21 +148,21 @@
         <div class="action-controls">
             <button id="btnFold" class="btn-action btn-fold" disabled>
                 <span class="main-label">NO IR</span>
-                <span class="sub-label">Fold</span>
+                <span class="sub-label">Retirarse</span>
             </button>
 
             <button id="btnCheckCall" class="btn-action btn-check" disabled>
                 <span id="checkCallLabel" class="main-label">PASAR</span>
-                <span id="checkCallSub" class="sub-label">Check</span>
+                <span id="checkCallSub" class="sub-label">Paso</span>
             </button>
 
             <div class="raise-control-group">
                 <div class="presets-row">
                     <button id="btnPresetMin" class="preset-btn">Mín</button>
-                    <button id="btnPreset2BB" class="preset-btn">2.5 BB</button>
+                    <button id="btnPreset2BB" class="preset-btn">2.5 CG</button>
                     <button id="btnPresetHalfPot" class="preset-btn">1/2 Bote</button>
                     <button id="btnPresetPot" class="preset-btn">Bote</button>
-                    <button id="btnPresetAllIn" class="preset-btn">All-In</button>
+                    <button id="btnPresetAllIn" class="preset-btn">Todo</button>
                 </div>
                 <input type="range" id="raiseSlider" class="raise-slider" min="20" max="1000" step="10" value="40">
             </div>
@@ -189,12 +189,12 @@
         <div class="chat-messages" id="chatMessages">
             <div class="chat-bubble system">
                 <div class="sender">Mesa</div>
-                <div>Bienvenidos. Las apuestas se gestionan por turnos.</div>
+                <div>Bienvenidos a la mesa. Las apuestas se realizan por turnos.</div>
             </div>
         </div>
 
         <div class="quick-reactions">
-            <button class="quick-reaction-btn" data-text="All-in">All-in</button>
+            <button class="quick-reaction-btn" data-text="Voy con todo">Voy con todo</button>
             <button class="quick-reaction-btn" data-text="Buen farol">Buen farol</button>
             <button class="quick-reaction-btn" data-text="Buena suerte">Buena suerte</button>
             <button class="quick-reaction-btn" data-text="Bien jugado">Bien jugado</button>
@@ -216,9 +216,9 @@
     <div id="lobbyModal" class="modal-overlay">
         <div class="modal-card">
             <div class="modal-header">
-                <span class="modal-subtitle-top">SALA DE POKER</span>
-                <h2>POKER CLUB</h2>
-                <p>Partida multijugador Texas Hold'em</p>
+                <span class="modal-subtitle-top">SALA DE PÓQUER</span>
+                <h2>CLUB DE PÓQUER</h2>
+                <p>Partida multijugador de Póquer Texas Hold'em</p>
             </div>
 
             <div class="lobby-tabs">
@@ -264,19 +264,19 @@
                     <div class="form-group">
                         <label for="initialChipsSelect">Fichas Iniciales</label>
                         <select id="initialChipsSelect" class="form-input">
-                            <option value="500">500 Fichas (Corta)</option>
+                            <option value="500">500 Fichas (Partida corta)</option>
                             <option value="1000" selected>1,000 Fichas (Estándar)</option>
-                            <option value="2000">2,000 Fichas (Profunda)</option>
-                            <option value="5000">5,000 Fichas (Larga)</option>
+                            <option value="2000">2,000 Fichas (Partida profunda)</option>
+                            <option value="5000">5,000 Fichas (Mesa larga)</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="blindsSelect">Ciegas Iniciales (SB / BB)</label>
+                        <label for="blindsSelect">Ciegas Iniciales (Pequeña / Grande)</label>
                         <select id="blindsSelect" class="form-input">
-                            <option value="10/20" selected>10 / 20</option>
-                            <option value="25/50">25 / 50</option>
-                            <option value="50/100">50 / 100</option>
+                            <option value="10/20" selected>10 / 20 (Ciegas: 10 pequeña / 20 grande)</option>
+                            <option value="25/50">25 / 50 (Ciegas: 25 pequeña / 50 grande)</option>
+                            <option value="50/100">50 / 100 (Ciegas: 50 pequeña / 100 grande)</option>
                         </select>
                     </div>
                 </div>
@@ -313,7 +313,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE REGLAS DE POKER -->
+    <!-- MODAL DE REGLAS DE PÓQUER -->
     <div id="rulesModal" class="modal-overlay" style="display: none;">
         <div class="modal-card" style="max-width: 520px;">
             <div class="modal-header">
@@ -328,12 +328,12 @@
                 </button>
             </div>
             <div class="modal-body rules-list-body">
-                <div class="rule-item"><strong>1. Escalera Real:</strong> A, K, Q, J, 10 del mismo palo. La jugada más alta.</div>
+                <div class="rule-item"><strong>1. Escalera Real de Color:</strong> As, Rey, Dama, Jota y Diez del mismo palo. La jugada suprema invencible.</div>
                 <div class="rule-item"><strong>2. Escalera de Color:</strong> 5 cartas consecutivas del mismo palo (ej. 9♠ 8♠ 7♠ 6♠ 5♠).</div>
-                <div class="rule-item"><strong>3. Póker:</strong> 4 cartas del mismo valor (ej. K♠ K♥ K♦ K♣ 4♦).</div>
-                <div class="rule-item"><strong>4. Full House:</strong> Un trío combinado con una pareja (ej. J♦ J♠ J♥ 8♣ 8♦).</div>
-                <div class="rule-item"><strong>5. Color:</strong> 5 cartas cualesquiera del mismo palo no consecutivas.</div>
-                <div class="rule-item"><strong>6. Escalera:</strong> 5 cartas consecutivas de palos variados (El As cuenta como 14 o como 1).</div>
+                <div class="rule-item"><strong>3. Póker:</strong> 4 cartas de idéntico valor (ej. K♠ K♥ K♦ K♣ 4♦).</div>
+                <div class="rule-item"><strong>4. Full:</strong> Un trío combinado con una pareja (ej. J♦ J♠ J♥ 8♣ 8♦).</div>
+                <div class="rule-item"><strong>5. Color:</strong> 5 cartas cualesquiera del mismo palo sin orden correlativo.</div>
+                <div class="rule-item"><strong>6. Escalera:</strong> 5 cartas consecutivas de palos variados (el As sirve como carta alta o como 1).</div>
                 <div class="rule-item"><strong>7. Trío:</strong> 3 cartas del mismo valor.</div>
                 <div class="rule-item"><strong>8. Doble Pareja:</strong> Dos parejas distintas de cartas.</div>
                 <div class="rule-item"><strong>9. Pareja:</strong> Dos cartas de idéntico valor.</div>

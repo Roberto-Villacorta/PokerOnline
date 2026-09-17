@@ -465,34 +465,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const sbPlayer = gameState.players.find(p => p.seat === sbSeat);
         const bbPlayer = gameState.players.find(p => p.seat === bbSeat);
 
-        // Cobrar SB
+        // Cobrar Ciega Pequeña
         const sbAmount = Math.min(sbPlayer.chips, gameState.smallBlind);
         sbPlayer.chips -= sbAmount;
         sbPlayer.currentRoundBet = sbAmount;
         sbPlayer.totalBet = sbAmount;
         gameState.pot += sbAmount;
-        sbPlayer.lastAction = `SB $${sbAmount}`;
+        sbPlayer.lastAction = `C. PEQUEÑA $${sbAmount}`;
 
-        // Cobrar BB
+        // Cobrar Ciega Grande
         const bbAmount = Math.min(bbPlayer.chips, gameState.bigBlind);
         bbPlayer.chips -= bbAmount;
         bbPlayer.currentRoundBet = bbAmount;
         bbPlayer.totalBet = bbAmount;
         gameState.pot += bbAmount;
-        bbPlayer.lastAction = `BB $${bbAmount}`;
+        bbPlayer.lastAction = `C. GRANDE $${bbAmount}`;
 
         gameState.currentBet = gameState.bigBlind;
         gameState.minRaise = gameState.bigBlind;
 
-        // El primer turno pre-flop es el jugador a la izquierda de la BB (Under The Gun)
+        // El primer turno de la mano es el jugador a la izquierda de la Ciega Grande
         gameState.currentTurnSeat = getNextActiveSeat(bbSeat);
 
         window.AudioFX.playCardDeal();
         window.AudioFX.playChipClink(3);
 
-        UI.roundStatusBanner.textContent = 'Fase: Pre-Flop | Ciega Pequeña: ' + sbPlayer.name + ' | Ciega Grande: ' + bbPlayer.name;
+        UI.roundStatusBanner.textContent = 'Mano en juego: Cartas privadas | Ciega Pequeña: ' + sbPlayer.name + ' | Ciega Grande: ' + bbPlayer.name;
 
-        // Si es host online, enviar cartas privadas confidenciales a cada cliente
+        // Si es anfitrión online, enviar cartas privadas confidenciales a cada cliente
         if (gameState.mode === 'ONLINE_HOST' && multiplayer) {
             gameState.players.forEach(p => {
                 if (p.id === gameState.myPlayerId) {
@@ -545,11 +545,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (action === 'FOLD') {
             player.folded = true;
-            player.lastAction = 'FOLD';
+            player.lastAction = 'NO VA';
             window.AudioFX.playFold();
             showToast(`${player.name} no va.`);
         } else if (action === 'CHECK') {
-            player.lastAction = 'CHECK';
+            player.lastAction = 'PASA';
             window.AudioFX.playCheckTap();
             showToast(`${player.name} pasa.`);
         } else if (action === 'CALL') {
@@ -559,7 +559,7 @@ document.addEventListener('DOMContentLoaded', () => {
             player.totalBet += amountToCall;
             gameState.pot += amountToCall;
             if (player.chips === 0) player.isAllIn = true;
-            player.lastAction = player.isAllIn ? 'ALL-IN' : `CALL $${amountToCall}`;
+            player.lastAction = player.isAllIn ? 'TODO DENTRO' : `IGUALA $${amountToCall}`;
             window.AudioFX.playChipClink(2);
             showToast(`${player.name} iguala $${amountToCall}.`);
         } else if (action === 'RAISE') {
@@ -583,7 +583,7 @@ document.addEventListener('DOMContentLoaded', () => {
             gameState.playersActedThisRound.clear();
 
             if (player.chips === 0) player.isAllIn = true;
-            player.lastAction = player.isAllIn ? 'ALL-IN' : `SUBE A $${player.currentRoundBet}`;
+            player.lastAction = player.isAllIn ? 'TODO DENTRO' : `SUBE A $${player.currentRoundBet}`;
 
             if (player.isAllIn) {
                 window.AudioFX.playAllIn();
@@ -665,23 +665,23 @@ document.addEventListener('DOMContentLoaded', () => {
             gameState.deck.pop(); // Carta quemada
             gameState.communityCards = [gameState.deck.pop(), gameState.deck.pop(), gameState.deck.pop()];
             window.AudioFX.playCardDeal();
-            UI.roundStatusBanner.textContent = 'Fase: FLOP';
+            UI.roundStatusBanner.textContent = 'Fase: El Flop (primeras 3 comunitarias)';
         } else if (gameState.stage === 'FLOP') {
             // Repartir TURN (1 carta)
             gameState.stage = 'TURN';
             gameState.deck.pop(); // Carta quemada
             gameState.communityCards.push(gameState.deck.pop());
             window.AudioFX.playCardDeal();
-            UI.roundStatusBanner.textContent = 'Fase: TURN';
+            UI.roundStatusBanner.textContent = 'Fase: El Turn (4ª carta comunitaria)';
         } else if (gameState.stage === 'TURN') {
             // Repartir RIVER (1 carta)
             gameState.stage = 'RIVER';
             gameState.deck.pop(); // Carta quemada
             gameState.communityCards.push(gameState.deck.pop());
             window.AudioFX.playCardDeal();
-            UI.roundStatusBanner.textContent = 'Fase: RIVER';
+            UI.roundStatusBanner.textContent = 'Fase: El River (5ª carta final)';
         } else if (gameState.stage === 'RIVER') {
-            // SHOWDOWN
+            // Confrontación final
             executeShowdown();
             return;
         }
@@ -1075,15 +1075,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const callDifference = gameState.currentBet - activePlayer.currentRoundBet;
 
         if (callDifference <= 0) {
-            // Se puede PASAR (CHECK)
+            // Se puede PASAR (Paso)
             UI.checkCallLabel.textContent = 'PASAR';
-            UI.checkCallSub.textContent = 'Check';
+            UI.checkCallSub.textContent = 'Paso';
             UI.btnCheckCall.className = 'btn-action btn-check';
         } else {
-            // Se debe IGUALAR (CALL)
+            // Se debe IGUALAR (Pagar)
             const callAmount = Math.min(callDifference, activePlayer.chips);
             UI.checkCallLabel.textContent = 'IGUALAR';
-            UI.checkCallSub.textContent = `$${callAmount}`;
+            UI.checkCallSub.textContent = `Pagar $${callAmount}`;
             UI.btnCheckCall.className = 'btn-action btn-call';
         }
 

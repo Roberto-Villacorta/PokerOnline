@@ -12,8 +12,12 @@ const RANK_VALUES = {
     'T': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14
 };
 const RANK_NAMES = {
-    '2': '2', '3': '3', '4': '4', '5': '5', '6': '6', '7': '7', '8': '8', '9': '9',
-    'T': '10', 'J': 'Jota', 'Q': 'Reina', 'K': 'Rey', 'A': 'As'
+    '2': 'Doses', '3': 'Treses', '4': 'Cuatros', '5': 'Cincos', '6': 'Seises', '7': 'Sietes', '8': 'Ochos', '9': 'Nueves',
+    'T': 'Dieces', 'J': 'Jotas', 'Q': 'Damas', 'K': 'Reyes', 'A': 'Ases'
+};
+const RANK_SINGULAR = {
+    '2': 'Dos', '3': 'Tres', '4': 'Cuatro', '5': 'Cinco', '6': 'Seis', '7': 'Siete', '8': 'Ocho', '9': 'Nueve',
+    'T': 'Diez', 'J': 'Jota', 'Q': 'Dama', 'K': 'Rey', 'A': 'As'
 };
 
 const HAND_TYPES = {
@@ -33,7 +37,7 @@ const HAND_TYPE_NAMES = {
     9: 'Escalera Real',
     8: 'Escalera de Color',
     7: 'Póker',
-    6: 'Full House',
+    6: 'Full',
     5: 'Color',
     4: 'Escalera',
     3: 'Trío',
@@ -135,7 +139,7 @@ function evaluate5Cards(cards) {
             typeName: HAND_TYPE_NAMES[HAND_TYPES.STRAIGHT_FLUSH],
             score: [HAND_TYPES.STRAIGHT_FLUSH, straightHigh],
             cards: sorted,
-            desc: `Escalera de Color al ${RANK_NAMES[RANKS[straightHigh - 2]]}`
+            desc: `Escalera de Color al ${RANK_SINGULAR[RANKS[straightHigh - 2]]}`
         };
     }
 
@@ -152,7 +156,7 @@ function evaluate5Cards(cards) {
         };
     }
 
-    // 3. Full House
+    // 3. Full (Full House)
     if (countPairs[0].count === 3 && countPairs[1].count === 2) {
         const trioVal = countPairs[0].val;
         const pairVal = countPairs[1].val;
@@ -161,7 +165,7 @@ function evaluate5Cards(cards) {
             typeName: HAND_TYPE_NAMES[HAND_TYPES.FULL_HOUSE],
             score: [HAND_TYPES.FULL_HOUSE, trioVal, pairVal],
             cards: sorted,
-            desc: `Full House de ${RANK_NAMES[RANKS[trioVal - 2]]} y ${RANK_NAMES[RANKS[pairVal - 2]]}`
+            desc: `Full de ${RANK_NAMES[RANKS[trioVal - 2]]} y ${RANK_NAMES[RANKS[pairVal - 2]]}`
         };
     }
 
@@ -172,7 +176,7 @@ function evaluate5Cards(cards) {
             typeName: HAND_TYPE_NAMES[HAND_TYPES.FLUSH],
             score: [HAND_TYPES.FLUSH, ...values],
             cards: sorted,
-            desc: `Color al ${RANK_NAMES[RANKS[values[0] - 2]]}`
+            desc: `Color al ${RANK_SINGULAR[RANKS[values[0] - 2]]}`
         };
     }
 
@@ -183,7 +187,7 @@ function evaluate5Cards(cards) {
             typeName: HAND_TYPE_NAMES[HAND_TYPES.STRAIGHT],
             score: [HAND_TYPES.STRAIGHT, straightHigh],
             cards: sorted,
-            desc: `Escalera al ${RANK_NAMES[RANKS[straightHigh - 2]]}`
+            desc: `Escalera al ${RANK_SINGULAR[RANKS[straightHigh - 2]]}`
         };
     }
 
@@ -233,7 +237,7 @@ function evaluate5Cards(cards) {
         typeName: HAND_TYPE_NAMES[HAND_TYPES.HIGH_CARD],
         score: [HAND_TYPES.HIGH_CARD, ...values],
         cards: sorted,
-        desc: `Carta Alta ${RANK_NAMES[RANKS[values[0] - 2]]}`
+        desc: `Carta Alta ${RANK_SINGULAR[RANKS[values[0] - 2]]}`
     };
 }
 
@@ -271,7 +275,7 @@ function evaluateHand(holeCards, communityCards = []) {
             return {
                 type: HAND_TYPES.HIGH_CARD,
                 typeName: 'Carta Alta',
-                desc: `Carta Alta ${RANK_NAMES[RANKS[high - 2]]}`,
+                desc: `Carta Alta ${RANK_SINGULAR[RANKS[high - 2]]}`,
                 score: [HAND_TYPES.HIGH_CARD, high]
             };
         }
