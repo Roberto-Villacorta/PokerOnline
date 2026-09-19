@@ -230,6 +230,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         gestorRed = new GestorMultijugador({
             onPlayerJoined: (jugador) => {
+                const existe = estadoJuego.jugadores.some(j => (j.id && j.id === jugador.id) || (j.peerId && j.peerId === jugador.peerId));
+                if (!existe) {
+                    estadoJuego.jugadores.push({
+                        id: jugador.id || jugador.peerId,
+                        peerId: jugador.peerId || jugador.id,
+                        nombre: jugador.nombre || jugador.name,
+                        name: jugador.nombre || jugador.name,
+                        avatar: jugador.avatar || 'moss',
+                        fichas: jugador.fichas || jugador.chips || estadoJuego.fichasIniciales,
+                        chips: jugador.fichas || jugador.chips || estadoJuego.fichasIniciales,
+                        asiento: jugador.asiento ?? jugador.seat,
+                        seat: jugador.asiento ?? jugador.seat,
+                        cartasMano: [],
+                        holeCards: [],
+                        apuestaRondaActual: 0,
+                        currentRoundBet: 0,
+                        apuestaTotal: 0,
+                        totalBet: 0,
+                        retirado: false,
+                        folded: false,
+                        estaTodoDentro: false,
+                        isAllIn: false,
+                        esAnfitrion: false,
+                        isHost: false
+                    });
+                }
                 mostrarAviso(`${jugador.nombre || jugador.name} se ha sentado en la mesa`);
                 agregarMensajeChat('Mesa', `${jugador.nombre || jugador.name} se ha incorporado.`);
                 window.EfectosAudio.reproducirRepartoCarta();
@@ -238,6 +264,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 comprobarAutoInicioMano();
             },
             onPlayerLeft: (jugador) => {
+                const idx = estadoJuego.jugadores.findIndex(j => (j.id && (j.id === jugador.id || j.id === jugador.peerId)) || (j.peerId && (j.peerId === jugador.id || j.peerId === jugador.peerId)));
+                if (idx !== -1) {
+                    estadoJuego.jugadores.splice(idx, 1);
+                }
                 mostrarAviso(`${jugador.nombre || jugador.name} ha dejado su asiento`);
                 agregarMensajeChat('Mesa', `${jugador.nombre || jugador.name} ha salido.`);
                 dibujarMesa();
@@ -354,8 +384,34 @@ document.addEventListener('DOMContentLoaded', () => {
             estadoJuego.miIdJugador = resultadoUnion.myId;
             estadoJuego.miAsiento = resultadoUnion.mySeat;
 
+            if (resultadoUnion.players && Array.isArray(resultadoUnion.players)) {
+                estadoJuego.jugadores = resultadoUnion.players.map(sp => ({
+                    ...sp,
+                    id: sp.id || sp.peerId,
+                    peerId: sp.peerId || sp.id,
+                    nombre: sp.nombre || sp.name,
+                    name: sp.nombre || sp.name,
+                    avatar: sp.avatar || 'navy',
+                    fichas: sp.fichas || sp.chips,
+                    chips: sp.fichas || sp.chips,
+                    asiento: sp.asiento ?? sp.seat,
+                    seat: sp.asiento ?? sp.seat,
+                    cartasMano: [],
+                    holeCards: [],
+                    apuestaRondaActual: sp.apuestaRondaActual || sp.currentRoundBet || 0,
+                    currentRoundBet: sp.apuestaRondaActual || sp.currentRoundBet || 0,
+                    apuestaTotal: sp.apuestaTotal || sp.totalBet || 0,
+                    totalBet: sp.apuestaTotal || sp.totalBet || 0,
+                    retirado: sp.retirado || sp.folded || false,
+                    folded: sp.retirado || sp.folded || false,
+                    estaTodoDentro: sp.estaTodoDentro || sp.isAllIn || false,
+                    isAllIn: sp.estaTodoDentro || sp.isAllIn || false
+                }));
+            }
+
             configurarInterfazSala(resultadoUnion.roomCode);
             INTERFAZ.modalLobby.style.display = 'none';
+            dibujarMesa();
             mostrarAviso(`Conectado a la mesa ${resultadoUnion.roomCode}.`);
             agregarMensajeChat('Mesa', `Te has incorporado como ${nombre}.`);
         } catch (err) {
