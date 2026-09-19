@@ -1170,10 +1170,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
 
     function actualizarControles() {
-        const esMiTurno = (estadoJuego.modo === 'MESA_LOCAL') ||
-                         (estadoJuego.jugadores[estadoJuego.asientoTurnoActual]?.id === estadoJuego.miIdJugador);
-
         const jugadorActivo = estadoJuego.jugadores.find(j => (j.asiento ?? j.seat) === estadoJuego.asientoTurnoActual);
+        const esMiTurno = (estadoJuego.modo === 'MESA_LOCAL') ||
+                         (jugadorActivo && jugadorActivo.id === estadoJuego.miIdJugador);
 
         if (!esMiTurno || !jugadorActivo || jugadorActivo.retirado || jugadorActivo.estaTodoDentro || estadoJuego.fase === 'CONFRONTACION' || estadoJuego.fase === 'ESPERANDO') {
             INTERFAZ.botonNoIr.disabled = true;
