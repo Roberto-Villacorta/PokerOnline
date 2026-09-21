@@ -85,6 +85,27 @@ document.addEventListener('DOMContentLoaded', () => {
         formularioChat: document.getElementById('chatForm'),
         campoTextoChat: document.getElementById('chatInput'),
 
+        // Modales y Selección de Juego
+        modalSeleccionJuego: document.getElementById('gameSelectModal'),
+        botonSeleccionarPoker: document.getElementById('btnSelectPoker'),
+        botonSeleccionarBlackjack: document.getElementById('btnSelectBlackjack'),
+        tarjetaSeleccionarPoker: document.getElementById('cardSelectPoker'),
+        tarjetaSeleccionarBlackjack: document.getElementById('cardSelectBlackjack'),
+        botonSeleccionarJuegoBarra: document.getElementById('btnSelectGame'),
+        logotipoMarca: document.getElementById('brandLogo'),
+        botonVolverSeleccionJuego: document.getElementById('btnBackToGameSelect'),
+
+        // Vistas de Juego
+        vistaPoker: document.getElementById('pokerViewport'),
+        vistaBlackjack: document.getElementById('blackjackViewport'),
+        barraAccionesPoker: document.getElementById('pokerActionBar'),
+        barraAccionesBlackjack: document.getElementById('blackjackActionBar'),
+
+        // Acciones Blackjack
+        btnBjHit: document.getElementById('btnBjHit'),
+        btnBjStand: document.getElementById('btnBjStand'),
+        btnBjNewGame: document.getElementById('btnBjNewGame'),
+
         // Ventanas modales
         modalLobby: document.getElementById('lobbyModal'),
         pestanaCrear: document.getElementById('tabCreate'),
@@ -145,16 +166,78 @@ document.addEventListener('DOMContentLoaded', () => {
     const getInitials = obtenerIniciales;
 
     // ==========================================
-    // GESTIÓN DEL LOBBY
+    // SELECCIÓN DE JUEGO Y GESTIÓN DEL LOBBY
     // ==========================================
+    let modoJuegoActual = 'NINGUNO'; // 'POKER', 'BLACKJACK'
     let pestanaSeleccionada = 'crear';
     let avatarSeleccionado = 'navy';
+
+    function mostrarSeleccionJuego() {
+        if (INTERFAZ.modalSeleccionJuego) INTERFAZ.modalSeleccionJuego.style.display = 'flex';
+        if (INTERFAZ.modalLobby) INTERFAZ.modalLobby.style.display = 'none';
+    }
+
+    function abrirModoPoker() {
+        modoJuegoActual = 'POKER';
+        if (INTERFAZ.modalSeleccionJuego) INTERFAZ.modalSeleccionJuego.style.display = 'none';
+        if (INTERFAZ.modalLobby) INTERFAZ.modalLobby.style.display = 'flex';
+        if (INTERFAZ.vistaPoker) INTERFAZ.vistaPoker.style.display = 'flex';
+        if (INTERFAZ.vistaBlackjack) INTERFAZ.vistaBlackjack.style.display = 'none';
+        if (INTERFAZ.barraAccionesPoker) INTERFAZ.barraAccionesPoker.style.display = 'flex';
+        if (INTERFAZ.barraAccionesBlackjack) INTERFAZ.barraAccionesBlackjack.style.display = 'none';
+    }
+
+    function abrirModoBlackjack() {
+        modoJuegoActual = 'BLACKJACK';
+        if (INTERFAZ.modalSeleccionJuego) INTERFAZ.modalSeleccionJuego.style.display = 'none';
+        if (INTERFAZ.modalLobby) INTERFAZ.modalLobby.style.display = 'none';
+        if (INTERFAZ.vistaPoker) INTERFAZ.vistaPoker.style.display = 'none';
+        if (INTERFAZ.vistaBlackjack) INTERFAZ.vistaBlackjack.style.display = 'flex';
+        if (INTERFAZ.barraAccionesPoker) INTERFAZ.barraAccionesPoker.style.display = 'none';
+        if (INTERFAZ.barraAccionesBlackjack) INTERFAZ.barraAccionesBlackjack.style.display = 'flex';
+
+        if (window.ControladorBlackjack) {
+            window.ControladorBlackjack.iniciar();
+            window.ControladorBlackjack.nuevaMano();
+        }
+    }
+
+    if (INTERFAZ.botonSeleccionarPoker) {
+        INTERFAZ.botonSeleccionarPoker.addEventListener('click', abrirModoPoker);
+    }
+    if (INTERFAZ.tarjetaSeleccionarPoker) {
+        INTERFAZ.tarjetaSeleccionarPoker.addEventListener('click', (e) => {
+            if (e.target !== INTERFAZ.botonSeleccionarPoker) abrirModoPoker();
+        });
+    }
+
+    if (INTERFAZ.botonSeleccionarBlackjack) {
+        INTERFAZ.botonSeleccionarBlackjack.addEventListener('click', abrirModoBlackjack);
+    }
+    if (INTERFAZ.tarjetaSeleccionarBlackjack) {
+        INTERFAZ.tarjetaSeleccionarBlackjack.addEventListener('click', (e) => {
+            if (e.target !== INTERFAZ.botonSeleccionarBlackjack) abrirModoBlackjack();
+        });
+    }
+
+    if (INTERFAZ.botonSeleccionarJuegoBarra) {
+        INTERFAZ.botonSeleccionarJuegoBarra.addEventListener('click', mostrarSeleccionJuego);
+    }
+    if (INTERFAZ.logotipoMarca) {
+        INTERFAZ.logotipoMarca.addEventListener('click', mostrarSeleccionJuego);
+    }
+    if (INTERFAZ.botonVolverSeleccionJuego) {
+        INTERFAZ.botonVolverSeleccionJuego.addEventListener('click', mostrarSeleccionJuego);
+    }
 
     const parametrosUrl = new URLSearchParams(window.location.search);
     const parametroSala = parametrosUrl.get('sala') || parametrosUrl.get('room');
     if (parametroSala) {
+        abrirModoPoker();
         cambiarPestanaLobby('unirse');
         INTERFAZ.campoCodigoSala.value = parametroSala.toUpperCase();
+    } else {
+        mostrarSeleccionJuego();
     }
 
     INTERFAZ.pestanaCrear.addEventListener('click', () => cambiarPestanaLobby('crear'));
@@ -1378,6 +1461,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirm('¿Seguro que deseas salir de la mesa actual?')) {
             if (gestorRed) gestorRed.destruir();
             window.location.href = window.location.pathname;
+        }
+    });
+
+    // Atajos de teclado para Blackjack (P / S / N)
+    document.addEventListener('keydown', (e) => {
+        if (modoJuegoActual !== 'BLACKJACK') return;
+        const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+        if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+
+        const tecla = e.key.toLowerCase();
+        if (tecla === 'p') {
+            window.ControladorBlackjack.pedirCarta();
+        } else if (tecla === 's') {
+            window.ControladorBlackjack.plantarse();
+        } else if (tecla === 'n') {
+            window.ControladorBlackjack.nuevaMano();
         }
     });
 });

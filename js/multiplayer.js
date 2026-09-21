@@ -29,7 +29,7 @@ class GestorMultijugador {
      */
     static generarIdSala() {
         const numero = Math.floor(1000 + Math.random() * 9000);
-        return `PKR-${numero}`;
+        return `${numero}`;
     }
     static generateRoomId() { return GestorMultijugador.generarIdSala(); }
 

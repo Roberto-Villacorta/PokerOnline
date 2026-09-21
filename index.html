@@ -21,11 +21,11 @@
 
     <!-- BARRA SUPERIOR -->
     <header class="top-bar">
-        <div class="brand">
+        <div class="brand" id="brandLogo" style="cursor: pointer;" title="Ir al Menú Principal">
             <span class="brand-suit">♠</span>
             <div class="brand-text-block">
-                <span class="brand-title">CLUB DE PÓQUER</span>
-                <span class="brand-subtitle">PÓQUER TEXAS HOLD'EM</span>
+                <span class="brand-title">CLUB DE CASINO</span>
+                <span class="brand-subtitle">PÓQUER & BLACKJACK</span>
             </div>
         </div>
 
@@ -36,6 +36,16 @@
         </div>
 
         <div class="top-controls">
+            <!-- Botón Selección de Juego -->
+            <button id="btnSelectGame" class="icon-btn" title="Selección de Juego" aria-label="Cambiar Juego">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+            </button>
+
             <!-- Botón Sonido con SVG -->
             <button id="btnSound" class="icon-btn" title="Activar/Desactivar sonido" aria-label="Sonido">
                 <svg id="soundIconOn" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -78,7 +88,8 @@
 
     <!-- TAPETE Y VISTA DE JUEGO -->
     <main class="game-viewport">
-        <div class="poker-table-wrap">
+        <!-- VISTA DE PÓQUER -->
+        <div class="poker-table-wrap" id="pokerViewport">
             <div class="poker-table-outer">
                 <div class="poker-felt">
                     <div class="felt-texture-overlay"></div>
@@ -127,50 +138,135 @@
                 <div class="player-seat seat-5" id="seat-5"></div>
             </div>
         </div>
+
+        <!-- VISTA DE BLACKJACK 21 -->
+        <div class="blackjack-table-wrap" id="blackjackViewport" style="display: none;">
+            <div class="poker-table-outer bj-table-outer">
+                <div class="poker-felt bj-felt">
+                    <div class="felt-texture-overlay"></div>
+                    <div class="felt-bet-line bj-bet-line"></div>
+                    <div class="felt-watermark">BLACKJACK 21 • PAGA 3:2 • CRUPIER SE PLANTA EN 17</div>
+
+                    <!-- BANCA Y APUESTA DE BLACKJACK -->
+                    <div class="bj-chips-hud">
+                        <div class="bj-chip-badge">
+                            <span class="bj-chip-label">BANCA:</span>
+                            <span id="bjBankrollDisplay" class="bj-chip-val">$1,000</span>
+                        </div>
+                        <div class="bj-chip-badge">
+                            <span class="bj-chip-label">APUESTA:</span>
+                            <span id="bjCurrentBetDisplay" class="bj-chip-val">$50</span>
+                        </div>
+                    </div>
+
+                    <!-- ZONA CRUPIER -->
+                    <div class="bj-zone bj-dealer-zone">
+                        <div class="bj-player-header">
+                            <span class="bj-player-title">CRUPIER</span>
+                            <span id="bjDealerPoints" class="bj-points-badge">Puntos: ?</span>
+                        </div>
+                        <div class="bj-cards-container" id="bjDealerCards"></div>
+                    </div>
+
+                    <!-- BANNER RESULTADO BLACKJACK -->
+                    <div id="bjResultBanner" class="bj-result-banner" style="display: none;">
+                        <div id="bjResultMessage" class="bj-result-message">Blackjack - Has ganado</div>
+                    </div>
+
+                    <!-- ZONA JUGADOR -->
+                    <div class="bj-zone bj-player-zone">
+                        <div class="bj-player-header">
+                            <span class="bj-player-title">TUS CARTAS</span>
+                            <span id="bjPlayerPoints" class="bj-points-badge">Puntos: 0</span>
+                        </div>
+                        <div class="bj-cards-container" id="bjPlayerCards"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- PANEL INFERIOR DE ACCIONES -->
     <footer class="action-bar-wrap">
-        <div class="hand-advisor">
-            <div class="hand-advisor-info">
-                <span class="hand-advisor-label">Jugada:</span>
-                <span id="handAdvisorVal" class="hand-advisor-val">Esperando cartas</span>
+        <!-- ACCIONES PÓQUER -->
+        <div id="pokerActionBar" class="poker-action-bar-content" style="display: flex; width: 100%; align-items: center; justify-content: space-between;">
+            <div class="hand-advisor">
+                <div class="hand-advisor-info">
+                    <span class="hand-advisor-label">Jugada:</span>
+                    <span id="handAdvisorVal" class="hand-advisor-val">Esperando cartas</span>
+                </div>
+                <button id="btnTogglePrivacy" class="privacy-toggle-btn" title="Ocultar o mostrar tus cartas privadas">
+                    <svg id="privacyEyeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <span id="privacyText">Ocultar cartas</span>
+                </button>
             </div>
-            <button id="btnTogglePrivacy" class="privacy-toggle-btn" title="Ocultar o mostrar tus cartas privadas">
-                <svg id="privacyEyeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-                <span id="privacyText">Ocultar cartas</span>
-            </button>
+
+            <div class="action-controls">
+                <button id="btnFold" class="btn-action btn-fold" disabled>
+                    <span class="main-label">NO IR</span>
+                    <span class="sub-label">Retirarse</span>
+                </button>
+
+                <button id="btnCheckCall" class="btn-action btn-check" disabled>
+                    <span id="checkCallLabel" class="main-label">PASAR</span>
+                    <span id="checkCallSub" class="sub-label">Paso</span>
+                </button>
+
+                <div class="raise-control-group">
+                    <div class="presets-row">
+                        <button id="btnPresetMin" class="preset-btn">Mín</button>
+                        <button id="btnPreset2BB" class="preset-btn">2.5 CG</button>
+                        <button id="btnPresetHalfPot" class="preset-btn">1/2 Bote</button>
+                        <button id="btnPresetPot" class="preset-btn">Bote</button>
+                        <button id="btnPresetAllIn" class="preset-btn">Todo</button>
+                    </div>
+                    <input type="range" id="raiseSlider" class="raise-slider" min="20" max="1000" step="10" value="40">
+                </div>
+
+                <button id="btnRaise" class="btn-action btn-raise" disabled>
+                    <span class="main-label">SUBIR</span>
+                    <span id="raiseAmountLabel" class="sub-label">$40</span>
+                </button>
+            </div>
         </div>
 
-        <div class="action-controls">
-            <button id="btnFold" class="btn-action btn-fold" disabled>
-                <span class="main-label">NO IR</span>
-                <span class="sub-label">Retirarse</span>
-            </button>
-
-            <button id="btnCheckCall" class="btn-action btn-check" disabled>
-                <span id="checkCallLabel" class="main-label">PASAR</span>
-                <span id="checkCallSub" class="sub-label">Paso</span>
-            </button>
-
-            <div class="raise-control-group">
-                <div class="presets-row">
-                    <button id="btnPresetMin" class="preset-btn">Mín</button>
-                    <button id="btnPreset2BB" class="preset-btn">2.5 CG</button>
-                    <button id="btnPresetHalfPot" class="preset-btn">1/2 Bote</button>
-                    <button id="btnPresetPot" class="preset-btn">Bote</button>
-                    <button id="btnPresetAllIn" class="preset-btn">Todo</button>
-                </div>
-                <input type="range" id="raiseSlider" class="raise-slider" min="20" max="1000" step="10" value="40">
+        <!-- ACCIONES BLACKJACK -->
+        <div id="blackjackActionBar" class="bj-action-bar-content" style="display: none;">
+            <div class="bj-status-info">
+                <span class="bj-status-label">Modo Blackjack (Paga 3:2):</span>
+                <span id="bjTurnText" class="bj-status-val">Tu turno (Pide carta o plántate)</span>
             </div>
 
-            <button id="btnRaise" class="btn-action btn-raise" disabled>
-                <span class="main-label">SUBIR</span>
-                <span id="raiseAmountLabel" class="sub-label">$40</span>
-            </button>
+            <div class="bj-bet-selector">
+                <span class="bj-status-label">Fichas:</span>
+                <div class="presets-row">
+                    <button class="preset-btn btn-bj-bet" data-amount="10">$10</button>
+                    <button class="preset-btn btn-bj-bet" data-amount="25">$25</button>
+                    <button class="preset-btn btn-bj-bet active" data-amount="50">$50</button>
+                    <button class="preset-btn btn-bj-bet" data-amount="100">$100</button>
+                    <button class="preset-btn btn-bj-bet" data-amount="500">$500</button>
+                </div>
+            </div>
+
+            <div class="action-controls bj-action-controls">
+                <button id="btnBjHit" class="btn-action btn-bj-hit">
+                    <span class="main-label">PUSH (P)</span>
+                    <span class="sub-label">Pedir Carta</span>
+                </button>
+
+                <button id="btnBjStand" class="btn-action btn-bj-stand">
+                    <span class="main-label">STAY (S)</span>
+                    <span class="sub-label">Plantarse</span>
+                </button>
+
+                <button id="btnBjNewGame" class="btn-action btn-bj-new">
+                    <span class="main-label">NUEVA MANO</span>
+                    <span class="sub-label">Volver a repartir</span>
+                </button>
+            </div>
         </div>
     </footer>
 
@@ -212,10 +308,61 @@
         </form>
     </aside>
 
-    <!-- MODAL DE LOBBY / ENTRADA AL JUEGO -->
-    <div id="lobbyModal" class="modal-overlay">
-        <div class="modal-card">
+    <!-- MODAL DE SELECCIÓN DE JUEGO (PANTALLA ANTERIOR) -->
+    <div id="gameSelectModal" class="modal-overlay">
+        <div class="modal-card game-select-card">
             <div class="modal-header">
+                <span class="modal-subtitle-top">SALA PRINCIPAL</span>
+                <h2>CLUB DE CASINO</h2>
+                <p>Selecciona la modalidad de juego para comenzar</p>
+            </div>
+
+            <div class="game-select-grid">
+                <!-- TARJETA PÓQUER -->
+                <div class="game-card" id="cardSelectPoker">
+                    <div class="game-card-badge">PÓQUER</div>
+                    <div class="game-card-icon">♠</div>
+                    <h3>Texas Hold'em</h3>
+                    <p class="game-card-desc">Salas multijugador online P2P y mesa local. Hasta 6 jugadores en la misma mesa.</p>
+                    <ul class="game-card-features">
+                        <li><span class="feature-dot">♦</span> Código corto de sala (ej. 4821)</li>
+                        <li><span class="feature-dot">♦</span> Asistente de jugadas en vivo</li>
+                        <li><span class="feature-dot">♦</span> Chat y sonido realista</li>
+                    </ul>
+                    <button id="btnSelectPoker" class="btn-primary game-card-btn">
+                        ENTRAR AL PÓQUER
+                    </button>
+                </div>
+
+                <!-- TARJETA BLACKJACK -->
+                <div class="game-card" id="cardSelectBlackjack">
+                    <div class="game-card-badge">BLACKJACK</div>
+                    <div class="game-card-icon">21</div>
+                    <h3>Blackjack 21</h3>
+                    <p class="game-card-desc">Ponte a prueba contra el crupier. Pide carta (Push) o plántate (Stay) para conseguir 21.</p>
+                    <ul class="game-card-features">
+                        <li><span class="feature-dot">♦</span> Baraja completa de 52 cartas</li>
+                        <li><span class="feature-dot">♦</span> Crupier se planta en 17</li>
+                        <li><span class="feature-dot">♦</span> Atajos de teclado (P / S)</li>
+                    </ul>
+                    <button id="btnSelectBlackjack" class="btn-primary game-card-btn btn-bj-theme">
+                        JUGAR AL BLACKJACK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE LOBBY / ENTRADA AL JUEGO DE PÓQUER -->
+    <div id="lobbyModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header" style="position: relative;">
+                <button id="btnBackToGameSelect" class="icon-btn" style="position: absolute; top: 0px; left: 0px; width: 32px; height: 32px;" title="Volver a Selección de Juego">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </button>
                 <span class="modal-subtitle-top">SALA DE PÓQUER</span>
                 <h2>CLUB DE PÓQUER</h2>
                 <p>Partida multijugador de Póquer Texas Hold'em</p>
@@ -284,8 +431,8 @@
                 <!-- Opciones Unirse a Sala -->
                 <div id="joinRoomOptions" style="display: none;">
                     <div class="form-group">
-                        <label for="roomCodeInput">Código de la Mesa</label>
-                        <input type="text" id="roomCodeInput" class="form-input" placeholder="Ej. PKR-4821" maxlength="12" style="text-transform: uppercase;">
+                        <label for="roomCodeInput">Código de la Mesa (solo números)</label>
+                        <input type="text" id="roomCodeInput" class="form-input" placeholder="Ej. 4821" maxlength="8" style="text-transform: uppercase;">
                     </div>
                 </div>
 
@@ -350,6 +497,7 @@
     <script src="js/poker-evaluator.js?v=1.0.1"></script>
     <script src="js/audio.js?v=1.0.1"></script>
     <script src="js/multiplayer.js?v=1.0.1"></script>
+    <script src="js/blackjack.js?v=1.0.1"></script>
     <script src="js/app.js?v=1.0.1"></script>
 
 </body>

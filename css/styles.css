@@ -377,19 +377,26 @@ body {
     padding: 5px 6px;
     font-family: var(--font-serif);
     font-weight: 700;
-    transform-style: preserve-3d;
-    animation: cardDeal 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-@keyframes cardDeal {
-    0% {
-        opacity: 0;
-        transform: translateY(-25px) scale(0.85);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+/* Errores de encuadre humano (inclinaciones y ligeros desajustes de posición táctiles) */
+.poker-card:nth-child(1) {
+    transform: rotate(-2.2deg) translateY(1px);
+}
+.poker-card:nth-child(2) {
+    transform: rotate(1.8deg) translateY(-2px);
+}
+.poker-card:nth-child(3) {
+    transform: rotate(-1.5deg) translateY(2px);
+}
+.poker-card:nth-child(4) {
+    transform: rotate(2.4deg) translateY(-1px);
+}
+.poker-card:nth-child(5) {
+    transform: rotate(-2.6deg) translateY(3px);
+}
+.poker-card:nth-child(6) {
+    transform: rotate(1.2deg) translateY(-2px);
 }
 
 .poker-card.hearts,
@@ -1239,3 +1246,367 @@ body {
         min-width: 80px;
     }
 }
+
+/* ==========================================================================
+   MODAL DE SELECCIÓN DE JUEGO (PANTALLA INICIAL / ANTERIOR)
+   ========================================================================== */
+
+.game-select-card {
+    max-width: 680px !important;
+    width: 90%;
+}
+
+.game-select-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 15px;
+}
+
+@media (max-width: 640px) {
+    .game-select-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.game-card {
+    background: #14171a;
+    border: 1px solid rgba(199, 167, 109, 0.25);
+    border-radius: 12px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.game-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--brass-accent);
+    box-shadow: 0 12px 30px rgba(199, 167, 109, 0.2);
+    background: #191e23;
+}
+
+.game-card-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--brass-accent);
+    background: rgba(199, 167, 109, 0.12);
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(199, 167, 109, 0.3);
+}
+
+.game-card-icon {
+    font-size: 38px;
+    margin-bottom: 10px;
+    color: var(--brass-accent);
+    font-family: var(--font-serif);
+}
+
+.game-card h3 {
+    font-family: var(--font-serif);
+    font-size: 20px;
+    color: #ede8df;
+    margin-bottom: 8px;
+}
+
+.game-card-desc {
+    font-size: 13px;
+    color: #9ca3af;
+    line-height: 1.4;
+    margin-bottom: 14px;
+}
+
+.game-card-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+    text-align: left;
+    width: 100%;
+    font-size: 12px;
+    color: #d1d5db;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.game-card-features li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.feature-dot {
+    color: var(--brass-accent);
+    font-size: 10px;
+}
+
+.game-card-btn {
+    margin-top: auto;
+    width: 100%;
+    font-size: 13px;
+    letter-spacing: 1px;
+}
+
+.btn-bj-theme {
+    background: linear-gradient(135deg, #2b4c59 0%, #1a3039 100%);
+    border-color: #3e6d80;
+}
+
+.btn-bj-theme:hover {
+    background: linear-gradient(135deg, #355d6e 0%, #23404c 100%);
+}
+
+/* ==========================================================================
+   MESA Y TAPETE DE BLACKJACK 21
+   ========================================================================== */
+
+.blackjack-table-wrap {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    max-width: 1100px;
+    aspect-ratio: 16 / 9;
+    max-height: 75vh;
+}
+
+.bj-felt {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px 36px;
+}
+
+.bj-bet-line {
+    border-color: rgba(214, 188, 131, 0.18);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 82%;
+    height: 78%;
+}
+
+.bj-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    z-index: 10;
+}
+
+.bj-player-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(15, 20, 24, 0.7);
+    border: 1px solid rgba(199, 167, 109, 0.3);
+    padding: 6px 18px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+}
+
+.bj-player-title {
+    font-family: var(--font-serif);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #ede8df;
+}
+
+.bj-points-badge {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--brass-accent);
+    background: rgba(0, 0, 0, 0.4);
+    padding: 2px 10px;
+    border-radius: 10px;
+}
+
+.bj-cards-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    min-height: 105px;
+}
+
+.bj-cards-container .poker-card {
+    width: 72px;
+    height: 102px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* BANNER DE RESULTADOS BJ */
+.bj-result-banner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 25;
+    text-align: center;
+    pointer-events: none;
+}
+
+.bj-result-message {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 700;
+    color: #ede8df;
+    padding: 14px 32px;
+    border-radius: 8px;
+    background: rgba(17, 21, 26, 0.95);
+    border: 2px solid var(--brass-accent);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+    letter-spacing: 1px;
+}
+
+.bj-result-banner.victoria .bj-result-message {
+    border-color: #34d399;
+    color: #a7f3d0;
+    background: rgba(12, 38, 26, 0.95);
+}
+
+.bj-result-banner.derrota .bj-result-message {
+    border-color: #f87171;
+    color: #fecaca;
+    background: rgba(45, 16, 18, 0.95);
+}
+
+.bj-result-banner.empate .bj-result-message {
+    border-color: #fbbf24;
+    color: #fef3c7;
+    background: rgba(40, 32, 16, 0.95);
+}
+
+/* CONTROLES BARRA DE ACCIÓN BLACKJACK */
+.bj-action-bar-content {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.bj-status-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.bj-status-label {
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: #8c7f73;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.bj-status-val {
+    font-size: 13px;
+    color: #e2e8f0;
+    font-weight: 600;
+}
+
+.bj-action-controls {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-bj-hit {
+    background: linear-gradient(180deg, #2b4c59 0%, #1e3640 100%);
+    border-color: #43778c;
+    color: #e0f2fe;
+}
+
+.btn-bj-hit:hover:not(:disabled) {
+    background: linear-gradient(180deg, #355d6e 0%, #254452 100%);
+}
+
+.btn-bj-stand {
+    background: linear-gradient(180deg, #73532f 0%, #4f3920 100%);
+    border-color: #9e7343;
+    color: #fef3c7;
+}
+
+.btn-bj-stand:hover:not(:disabled) {
+    background: linear-gradient(180deg, #876237 0%, #5d4325 100%);
+}
+
+.btn-bj-new {
+    background: linear-gradient(180deg, #2c4a3b 0%, #1b3026 100%);
+    border-color: #3f6b55;
+    color: #d1fae5;
+}
+
+.btn-bj-new:hover:not(:disabled) {
+    background: linear-gradient(180deg, #365948 0%, #223d30 100%);
+}
+
+/* BANCA Y APUESTAS BJ */
+.bj-chips-hud {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 16px;
+    z-index: 15;
+}
+
+.bj-chip-badge {
+    background: rgba(15, 20, 24, 0.85);
+    border: 1px solid rgba(199, 167, 109, 0.4);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.bj-chip-label {
+    color: #8c7f73;
+    font-size: 11px;
+}
+
+.bj-chip-val {
+    color: var(--brass-accent);
+}
+
+.bj-bet-selector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-bj-bet.active {
+    background: var(--brass-accent);
+    color: #14171a;
+    border-color: #f3e5ab;
+    font-weight: 700;
+    box-shadow: 0 0 10px rgba(199, 167, 109, 0.5);
+}
+
+.bj-result-banner.blackjack .bj-result-message {
+    border-color: #f59e0b;
+    color: #fef3c7;
+    background: linear-gradient(135deg, rgba(69, 44, 10, 0.96) 0%, rgba(31, 20, 5, 0.96) 100%);
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.6);
+    font-size: 24px;
+}
+
+

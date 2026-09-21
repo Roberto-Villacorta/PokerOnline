@@ -9,8 +9,8 @@ El proyecto está diseñado como una aplicación web estática optimizada para d
 ## Modos de Juego
 
 ### 1. Mesa en Línea (Multijugador P2P)
-- Un jugador abre la web, pulsa en **Crear Sala** y elige las fichas iniciales y ciegas.
-- La aplicación genera un código de mesa (por ejemplo, `PKR-4821`) y un enlace directo.
+- Un jugador abre la web, elige entre **Póquer** o **Blackjack** en la pantalla inicial, pulsa en **Crear Sala** y elige las fichas iniciales y ciegas.
+- La aplicación genera un código de mesa numérico (por ejemplo, `4821`) y un enlace directo.
 - Al compartir ese enlace con amigos, estos entran desde su ordenador o móvil, eligen su nombre o iniciales y toman asiento.
 - **Privacidad de mano**: cada jugador recibe exclusivamente sus dos cartas privadas en su dispositivo; las cartas comunitarias (Flop, Turn, River) y las apuestas se sincronizan de forma pública en la mesa.
 
