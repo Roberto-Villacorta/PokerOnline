@@ -1464,18 +1464,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Atajos de teclado para Blackjack (P / S / N)
+    // Atajos de teclado para Blackjack (C: Ir / V: Plantarse / Espacio: Nueva Mano)
     document.addEventListener('keydown', (e) => {
         if (modoJuegoActual !== 'BLACKJACK') return;
         const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
         if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
 
         const tecla = e.key.toLowerCase();
-        if (tecla === 'p') {
+        if (tecla === 'c') {
             window.ControladorBlackjack.pedirCarta();
-        } else if (tecla === 's') {
+        } else if (tecla === 'v') {
             window.ControladorBlackjack.plantarse();
-        } else if (tecla === 'n') {
+        } else if (e.code === 'Space' || tecla === ' ' || tecla === 'n') {
+            e.preventDefault();
             window.ControladorBlackjack.nuevaMano();
         }
     });

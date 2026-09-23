@@ -312,12 +312,12 @@ window.ControladorBlackjack = {
         if (motor.juegoActivo) {
             if (v.btnHit) v.btnHit.disabled = false;
             if (v.btnStand) v.btnStand.disabled = false;
-            if (v.textoTurno) v.textoTurno.textContent = 'Tu turno: Presiona PUSH (P) para pedir o STAY (S) para plantarse.';
+            if (v.textoTurno) v.textoTurno.textContent = 'Tu turno: Presiona IR (C) para pedir o PLANTARSE (V) para plantarse.';
             if (v.bannerResultado) v.bannerResultado.style.display = 'none';
         } else {
             if (v.btnHit) v.btnHit.disabled = true;
             if (v.btnStand) v.btnStand.disabled = true;
-            if (v.textoTurno) v.textoTurno.textContent = 'Mano finalizada. Selecciona tu apuesta y pulsa NUEVA MANO.';
+            if (v.textoTurno) v.textoTurno.textContent = 'Mano finalizada. Selecciona tu apuesta y pulsa NUEVA MANO (Espacio).';
 
             if (resultado && v.bannerResultado && v.mensajeResultado) {
                 v.mensajeResultado.textContent = resultado.mensaje;

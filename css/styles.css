@@ -1556,12 +1556,16 @@ body {
 /* BANCA Y APUESTAS BJ */
 .bj-chips-hud {
     position: absolute;
-    top: 20px;
+    top: 28px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     gap: 16px;
     z-index: 15;
+}
+
+.bj-dealer-zone {
+    margin-top: 48px;
 }
 
 .bj-chip-badge {
