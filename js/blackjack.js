@@ -134,20 +134,13 @@ class MotorBlackjack {
 
         // Si el jugador consigue Blackjack natural de inicio
         if (this.esBlackjackNatural(this.cartas_jugador)) {
-            return this.plantarse();
+            return true;
         }
 
         return null;
     }
 
-    plantarse() {
-        this.juegoActivo = false;
-
-        // Crupier roba hasta tener al menos 17 puntos
-        while (this.calcularPuntos(this.cartas_crupier) < 17) {
-            this.pedirCarta(false);
-        }
-
+    evaluarResultado() {
         const puntosUser = this.calcularPuntos(this.cartas_jugador);
         const puntosCrupier = this.calcularPuntos(this.cartas_crupier);
         const esBJUser = this.esBlackjackNatural(this.cartas_jugador);
@@ -201,6 +194,17 @@ class MotorBlackjack {
             fichas: this.fichas
         };
     }
+
+    plantarse() {
+        this.juegoActivo = false;
+
+        // Crupier roba hasta tener al menos 17 puntos
+        while (this.calcularPuntos(this.cartas_crupier) < 17) {
+            this.pedirCarta(false);
+        }
+
+        return this.evaluarResultado();
+    }
 }
 
 // Instancia global del motor de Blackjack
@@ -208,6 +212,8 @@ window.motorBJ = new MotorBlackjack();
 
 // Controlador UI de Blackjack
 window.ControladorBlackjack = {
+    enTurnoCrupier: false,
+
     iniciar() {
         this.vistas = {
             cartasJugador: document.getElementById('bjPlayerCards'),
@@ -241,6 +247,7 @@ window.ControladorBlackjack = {
         // Selección de fichas de apuesta
         document.querySelectorAll('.btn-bj-bet').forEach(btn => {
             btn.addEventListener('click', (e) => {
+                if (this.enTurnoCrupier) return;
                 const monto = parseInt(e.currentTarget.dataset.amount, 10) || 50;
                 window.motorBJ.apuestaSeleccionada = monto;
                 document.querySelectorAll('.btn-bj-bet').forEach(b => b.classList.remove('active'));
@@ -251,27 +258,70 @@ window.ControladorBlackjack = {
         });
     },
 
-    nuevaMano() {
-        const resultadoDirecto = window.motorBJ.iniciarPartida();
-        if (window.EfectosAudio) window.EfectosAudio.reproducirRepartoCarta();
-        this.renderizar(false, resultadoDirecto);
-    },
-
-    pedirCarta() {
-        if (!window.motorBJ.juegoActivo) return;
-        window.motorBJ.pedirCarta(true);
+    async nuevaMano() {
+        if (this.enTurnoCrupier) return;
+        const tieneBJ = window.motorBJ.iniciarPartida();
         if (window.EfectosAudio) window.EfectosAudio.reproducirRepartoCarta();
 
-        if (window.motorBJ.calcularPuntos(window.motorBJ.cartas_jugador) >= 21) {
-            this.plantarse();
+        if (tieneBJ) {
+            this.renderizar(false);
+            await new Promise(res => setTimeout(res, 600));
+            await this.ejecutarTurnoCrupier();
         } else {
             this.renderizar(false);
         }
     },
 
-    plantarse() {
-        if (!window.motorBJ.juegoActivo) return;
-        const resultado = window.motorBJ.plantarse();
+    async pedirCarta() {
+        if (this.enTurnoCrupier || !window.motorBJ.juegoActivo) return;
+        window.motorBJ.pedirCarta(true);
+        if (window.EfectosAudio) window.EfectosAudio.reproducirRepartoCarta();
+
+        const puntosUser = window.motorBJ.calcularPuntos(window.motorBJ.cartas_jugador);
+        if (puntosUser >= 21) {
+            this.renderizar(false);
+            await new Promise(res => setTimeout(res, 500));
+            await this.ejecutarTurnoCrupier();
+        } else {
+            this.renderizar(false);
+        }
+    },
+
+    async plantarse() {
+        if (this.enTurnoCrupier || !window.motorBJ.juegoActivo) return;
+        await this.ejecutarTurnoCrupier();
+    },
+
+    async ejecutarTurnoCrupier() {
+        const motor = window.motorBJ;
+        motor.juegoActivo = false;
+        this.enTurnoCrupier = true;
+
+        if (this.vistas.btnHit) this.vistas.btnHit.disabled = true;
+        if (this.vistas.btnStand) this.vistas.btnStand.disabled = true;
+        if (this.vistas.btnNewGame) this.vistas.btnNewGame.disabled = true;
+
+        if (this.vistas.textoTurno) {
+            this.vistas.textoTurno.textContent = 'Turno del crupier: Jugando mano...';
+        }
+
+        // Revelar la primera carta del crupier y sus puntos iniciales
+        this.renderizar(true, null);
+
+        // Crupier roba hasta tener al menos 17 puntos
+        // Espera de 500ms entre cada robo de carta
+        while (motor.calcularPuntos(motor.cartas_crupier) < 17) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            motor.pedirCarta(false);
+            if (window.EfectosAudio) window.EfectosAudio.reproducirRepartoCarta();
+            this.renderizar(true, null);
+        }
+
+        // Breve pausa de 500ms tras el último robo para observar el tapete
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const resultado = motor.evaluarResultado();
+        this.enTurnoCrupier = false;
         this.renderizar(true, resultado);
     },
 
@@ -290,10 +340,19 @@ window.ControladorBlackjack = {
             v.puntosJugador.textContent = `Puntos: ${motor.calcularPuntos(motor.cartas_jugador)}`;
         }
 
-        // Renderizar Cartas Crupier
+        // Renderizar Cartas Crupier y apilar si roba más de 2 cartas
         v.cartasCrupier.innerHTML = '';
-        motor.cartas_crupier.forEach(carta => {
-            v.cartasCrupier.appendChild(this.crearElementoCarta(carta));
+        const crupierMasDeDos = motor.cartas_crupier.length > 2;
+        if (crupierMasDeDos) {
+            v.cartasCrupier.classList.add('stacked');
+        } else {
+            v.cartasCrupier.classList.remove('stacked');
+        }
+
+        motor.cartas_crupier.forEach((carta, index) => {
+            const cartaEl = this.crearElementoCarta(carta);
+            cartaEl.style.zIndex = index + 1;
+            v.cartasCrupier.appendChild(cartaEl);
         });
 
         if (v.puntosCrupier) {
@@ -312,11 +371,19 @@ window.ControladorBlackjack = {
         if (motor.juegoActivo) {
             if (v.btnHit) v.btnHit.disabled = false;
             if (v.btnStand) v.btnStand.disabled = false;
+            if (v.btnNewGame) v.btnNewGame.disabled = false;
             if (v.textoTurno) v.textoTurno.textContent = 'Tu turno: Presiona IR (C) para pedir o PLANTARSE (V) para plantarse.';
+            if (v.bannerResultado) v.bannerResultado.style.display = 'none';
+        } else if (this.enTurnoCrupier) {
+            if (v.btnHit) v.btnHit.disabled = true;
+            if (v.btnStand) v.btnStand.disabled = true;
+            if (v.btnNewGame) v.btnNewGame.disabled = true;
+            if (v.textoTurno) v.textoTurno.textContent = 'Turno del crupier: Robando cartas...';
             if (v.bannerResultado) v.bannerResultado.style.display = 'none';
         } else {
             if (v.btnHit) v.btnHit.disabled = true;
             if (v.btnStand) v.btnStand.disabled = true;
+            if (v.btnNewGame) v.btnNewGame.disabled = false;
             if (v.textoTurno) v.textoTurno.textContent = 'Mano finalizada. Selecciona tu apuesta y pulsa NUEVA MANO (Espacio).';
 
             if (resultado && v.bannerResultado && v.mensajeResultado) {
