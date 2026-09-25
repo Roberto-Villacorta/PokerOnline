@@ -439,3 +439,29 @@ window.ControladorBlackjack = {
         return div;
     }
 };
+
+// Inicialización automática cuando la página contiene el tablero de blackjack
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('blackjackViewport')) {
+        window.ControladorBlackjack.iniciar();
+        window.ControladorBlackjack.nuevaMano();
+    }
+
+    // Atajos de teclado para Blackjack (C: Ir / V: Plantarse / Espacio: Nueva Mano)
+    document.addEventListener('keydown', (e) => {
+        if (!document.getElementById('blackjackViewport')) return;
+        const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+        if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+
+        const tecla = e.key.toLowerCase();
+        if (tecla === 'c') {
+            window.ControladorBlackjack.pedirCarta();
+        } else if (tecla === 'v') {
+            window.ControladorBlackjack.plantarse();
+        } else if (e.code === 'Space' || tecla === ' ' || tecla === 'n') {
+            e.preventDefault();
+            window.ControladorBlackjack.nuevaMano();
+        }
+    });
+});
+

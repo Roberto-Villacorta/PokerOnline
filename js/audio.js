@@ -263,3 +263,19 @@ class EfectosSonido {
 window.EfectosAudio = new EfectosSonido();
 window.AudioFX = window.EfectosAudio;
 window.SoundFX = EfectosSonido;
+
+// Vinculación automática del botón de sonido si existe en la página
+document.addEventListener('DOMContentLoaded', () => {
+    const btnSound = document.getElementById('btnSound');
+    const iconOn = document.getElementById('soundIconOn');
+    const iconOff = document.getElementById('soundIconOff');
+    if (btnSound && iconOn && iconOff && !btnSound.dataset.wiredAudio) {
+        btnSound.dataset.wiredAudio = 'true';
+        btnSound.addEventListener('click', () => {
+            const silenciado = window.EfectosAudio.conmutarSilencio();
+            iconOn.style.display = silenciado ? 'none' : 'block';
+            iconOff.style.display = silenciado ? 'block' : 'none';
+        });
+    }
+});
+

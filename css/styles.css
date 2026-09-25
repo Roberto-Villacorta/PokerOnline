@@ -2235,5 +2235,70 @@ body {
     }
 }
 
+/* ==========================================================================
+   PORTAL PRINCIPAL DE NAVEGACIÓN (INDEX.HTML)
+   ========================================================================== */
+.portal-main-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 36px 20px;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.portal-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.portal-header h1 {
+    font-family: var(--font-serif);
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    color: #ede8df;
+    margin-top: 4px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+}
+
+.portal-header p {
+    font-size: 14px;
+    color: #9ca3af;
+    margin-top: 6px;
+    letter-spacing: 0.5px;
+}
+
+.portal-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.game-card.portal-card {
+    cursor: pointer;
+    min-height: 420px;
+}
+
+.game-card.portal-card:hover .game-card-btn {
+    box-shadow: 0 4px 20px rgba(199, 167, 109, 0.5);
+    transform: translateY(-2px);
+}
+
+.portal-footer-watermark {
+    text-align: center;
+    padding: 16px;
+    font-size: 11px;
+    color: rgba(214, 188, 131, 0.35);
+    font-family: var(--font-serif);
+    letter-spacing: 2px;
+}
+
+
 
 

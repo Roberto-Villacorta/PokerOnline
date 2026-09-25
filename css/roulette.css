@@ -1,0 +1,1051 @@
+/* ==========================================================================
+   CLUB DE CASINO - MÓDULO VISUAL DE RULETA EUROPEA
+   Adaptado con la paleta clásica de lujo del casino (oro envejecido,
+   fieltro esmeralda profundo, tipografía Cinzel e Inter, y acabados pulidos).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   AJUSTES DEL MODAL DE SELECCIÓN DE JUEGO (3 JUEGOS: PÓQUER, BLACKJACK, RULETA)
+   -------------------------------------------------------------------------- */
+.game-select-card {
+    max-width: 1040px !important;
+    width: 95% !important;
+}
+
+.game-select-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 18px !important;
+}
+
+@media (max-width: 900px) {
+    .game-select-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .game-select-card {
+        max-width: 500px !important;
+    }
+}
+
+.btn-roulette-theme {
+    background: linear-gradient(135deg, #1b4332 0%, #0d281e 100%) !important;
+    border-color: #2d6a4f !important;
+    color: #ede8df !important;
+}
+
+.btn-roulette-theme:hover {
+    background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%) !important;
+    border-color: #c7a76d !important;
+    box-shadow: 0 4px 18px rgba(199, 167, 109, 0.3) !important;
+}
+
+/* --------------------------------------------------------------------------
+   CONTENEDOR Y TAPETE DE LA RULETA (EN VIEWPORT)
+   -------------------------------------------------------------------------- */
+.roulette-table-wrap {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    max-width: 1140px;
+    aspect-ratio: 16 / 9;
+    max-height: 76vh;
+    padding: 10px;
+}
+
+.roulette-table-outer {
+    position: absolute;
+    inset: 0;
+    border-radius: 200px;
+    background: radial-gradient(circle at center, #27211c 0%, #181411 75%, #0f0c0a 100%);
+    box-shadow: var(--shadow-table), 0 0 0 1px rgba(199, 167, 109, 0.2);
+    padding: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.roulette-felt {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 184px;
+    background-color: var(--felt-baize);
+    background-image: 
+        radial-gradient(ellipse at 50% 50%, var(--felt-baize-light) 0%, var(--felt-baize) 65%, var(--felt-baize-shadow) 100%);
+    border: 1px solid rgba(214, 188, 131, 0.25);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.7);
+}
+
+.roulette-felt .felt-watermark {
+    position: absolute;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-serif);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 5px;
+    color: rgba(214, 188, 131, 0.16);
+    pointer-events: none;
+    text-transform: uppercase;
+    white-space: nowrap;
+    z-index: 1;
+}
+
+/* --------------------------------------------------------------------------
+   ESTRUCTURA PRINCIPAL DEL JUEGO DE RULETA (RUEDA + TABLERO)
+   -------------------------------------------------------------------------- */
+.roulette-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 36px;
+    z-index: 10;
+    transform-origin: center center;
+    transition: transform 0.2s ease;
+}
+
+@media (max-width: 1100px) {
+    .roulette-stage {
+        transform: scale(0.9);
+    }
+}
+
+@media (max-width: 950px) {
+    .roulette-stage {
+        transform: scale(0.8);
+    }
+}
+
+@media (max-width: 800px) {
+    .roulette-stage {
+        flex-direction: column;
+        gap: 16px;
+        transform: scale(0.68);
+    }
+}
+
+/* --------------------------------------------------------------------------
+   RUEDA DE LA RULETA (ANIMACIONES Y MATERIALES)
+   -------------------------------------------------------------------------- */
+@keyframes wheelRotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(359deg);
+    }
+}
+
+@keyframes ballRotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(-359deg);
+    }
+}
+
+.roulette-wheel-wrapper {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.wheel {
+    height: 312px;
+    width: 312px;
+    position: relative;
+    border-radius: 50%;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75), 0 0 20px rgba(0, 0, 0, 0.5);
+    background: #0d0d0f;
+}
+
+.outerRim {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 292px;
+    height: 292px;
+    border-radius: 100%;
+    box-shadow: 0 0 18px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0, 0, 0, 0.6);
+    border: 10px solid #c7a76d;
+    background: radial-gradient(circle at 35% 35%, #2a2015, #14100c);
+}
+
+.sect {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 292px;
+    height: 292px;
+    border-radius: 100%;
+    clip: rect(0px, 292px, 292px, 146px);
+}
+
+.block {
+    transition: all 1s;
+    position: absolute;
+    width: 292px;
+    height: 292px;
+    border-radius: 100%;
+    clip: rect(0px, 146px, 292px, 0px);
+}
+
+.double, .single {
+    position: absolute;
+    z-index: 2;
+    color: #ede8df;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: var(--font-sans);
+    transform: rotate(3deg);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.double {
+    left: 148px;
+    margin-top: 5px;
+}
+
+.single {
+    left: 152px;
+    margin-top: 5px;
+}
+
+/* Colores de Casillas de la Ruleta */
+#sect1 .block {
+    background: linear-gradient(180deg, #106f3c 0%, #0a4625 100%);
+    transform: rotate(9.73deg);
+}
+
+#sect2 .block, #sect4 .block, #sect6 .block, #sect8 .block, #sect10 .block, 
+#sect12 .block, #sect14 .block, #sect16 .block, #sect18 .block, #sect20 .block, 
+#sect22 .block, #sect24 .block, #sect26 .block, #sect28 .block, #sect30 .block, 
+#sect32 .block, #sect34 .block, #sect36 .block {
+    background: linear-gradient(180deg, #b91c1c 0%, #7f1d1d 100%);
+    transform: rotate(9.73deg);
+}
+
+#sect3 .block, #sect5 .block, #sect7 .block, #sect9 .block, #sect11 .block, 
+#sect13 .block, #sect15 .block, #sect17 .block, #sect19 .block, #sect21 .block, 
+#sect23 .block, #sect25 .block, #sect27 .block, #sect29 .block, #sect31 .block, 
+#sect33 .block, #sect35 .block, #sect37 .block {
+    background: linear-gradient(180deg, #1f2429 0%, #0f1215 100%);
+    transform: rotate(9.73deg);
+}
+
+/* Rotación de cada sector de 9.73 grados */
+#sect2 { transform: rotate(9.73deg); }
+#sect3 { transform: rotate(19.46deg); }
+#sect4 { transform: rotate(29.19deg); }
+#sect5 { transform: rotate(38.92deg); }
+#sect6 { transform: rotate(48.65deg); }
+#sect7 { transform: rotate(58.38deg); }
+#sect8 { transform: rotate(68.11deg); }
+#sect9 { transform: rotate(77.84deg); }
+#sect10 { transform: rotate(87.57deg); }
+#sect11 { transform: rotate(97.3deg); }
+#sect12 { transform: rotate(107.03deg); }
+#sect13 { transform: rotate(116.76deg); }
+#sect14 { transform: rotate(126.49deg); }
+#sect15 { transform: rotate(136.22deg); }
+#sect16 { transform: rotate(145.95deg); }
+#sect17 { transform: rotate(155.68deg); }
+#sect18 { transform: rotate(165.41deg); }
+#sect19 { transform: rotate(175.14deg); }
+#sect20 { transform: rotate(184.87deg); }
+#sect21 { transform: rotate(194.6deg); }
+#sect22 { transform: rotate(204.33deg); }
+#sect23 { transform: rotate(214.06deg); }
+#sect24 { transform: rotate(223.79deg); }
+#sect25 { transform: rotate(233.52deg); }
+#sect26 { transform: rotate(243.25deg); }
+#sect27 { transform: rotate(252.98deg); }
+#sect28 { transform: rotate(262.71deg); }
+#sect29 { transform: rotate(272.44deg); }
+#sect30 { transform: rotate(282.17deg); }
+#sect31 { transform: rotate(291.9deg); }
+#sect32 { transform: rotate(301.63deg); }
+#sect33 { transform: rotate(311.36deg); }
+#sect34 { transform: rotate(321.09deg); }
+#sect35 { transform: rotate(330.82deg); }
+#sect36 { transform: rotate(340.55deg); }
+#sect37 { transform: rotate(350.28deg); }
+
+.pockets {
+    position: absolute;
+    top: 38px;
+    left: 38px;
+    width: 236px;
+    height: 236px;
+    background-color: #07090b;
+    border-radius: 100%;
+    opacity: 0.65;
+}
+
+.pocketsRim {
+    position: absolute;
+    top: 35px;
+    left: 35px;
+    width: 236px;
+    height: 236px;
+    border-radius: 100%;
+    border: 3px solid rgba(199, 167, 109, 0.45);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+}
+
+.cone {
+    position: absolute;
+    top: 64px;
+    left: 63px;
+    height: 180px;
+    width: 180px;
+    border: 2px solid rgba(199, 167, 109, 0.3);
+    border-radius: 100%;
+    background: radial-gradient(circle at 75px 75px, #422817 0%, #1b120c 60%, #070605 100%);
+    box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.9);
+}
+
+.ballTrack {
+    width: 212px;
+    height: 207px;
+    position: absolute;
+    left: 48px;
+    top: 51px;
+    border-radius: 100%;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.ball {
+    background: radial-gradient(circle at 35% 35%, #ffffff 0%, #e2e8f0 55%, #94a3b8 100%);
+    width: 15px;
+    height: 15px;
+    border-radius: 100%;
+    position: relative;
+    left: 109px;
+    top: -7px;
+    box-shadow: inset -2px -2px 3px rgba(0, 0, 0, 0.4), 0 3px 6px rgba(0, 0, 0, 0.65);
+}
+
+.turret {
+    border-radius: 100%;
+    background: radial-gradient(circle at 32% 32%, #f3d484 0%, #c7a76d 40%, #5e4522 90%, #20170a 100%);
+    width: 46px;
+    height: 46px;
+    position: absolute;
+    top: 133px;
+    left: 134px;
+    z-index: 2;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.turretHandle {
+    background: radial-gradient(circle at 45%, #f3d484 0%, #c7a76d 50%, #4a371c 100%);
+    width: 88px;
+    height: 14px;
+    position: absolute;
+    left: 112px;
+    top: 149px;
+    z-index: 2;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.thendOne, .thendTwo {
+    border-radius: 100%;
+    background: radial-gradient(circle at 30% 30%, #f3d484 0%, #c7a76d 45%, #3a2a14 100%);
+    width: 24px;
+    height: 24px;
+    position: absolute;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.6);
+}
+
+.thendOne {
+    top: -5px;
+    left: -18px;
+}
+
+.thendTwo {
+    top: -5px;
+    left: 82px;
+}
+
+/* --------------------------------------------------------------------------
+   TABLERO DE APUESTAS (ESTILO CASINO TRADICIONAL DE LUJO)
+   -------------------------------------------------------------------------- */
+#betting_board {
+    width: 504px;
+    height: 320px;
+    position: relative;
+    border: 1.5px solid rgba(199, 167, 109, 0.5);
+    background: rgba(14, 38, 26, 0.75);
+    border-radius: 6px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 40px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    flex-shrink: 0;
+    user-select: none;
+}
+
+/* Capa de Apuestas Múltiples (Líneas divisorias, Splits, Esquinas, Calles) */
+.winning_lines {
+    position: absolute;
+    margin-top: -137px;
+    width: 603px;
+    height: 0;
+    z-index: 4;
+    pointer-events: none;
+}
+
+.wlttb {
+    position: relative;
+    width: 100%;
+    height: 8px;
+    margin-left: -7.75px;
+    top: 269px;
+    pointer-events: none;
+}
+
+#wlttb_top {
+    position: absolute;
+    margin-top: -89px;
+    margin-left: 11px;
+}
+
+#wlttb_2, #wlttb_3 {
+    margin-top: 79px;
+}
+
+.ttbbetblock {
+    width: 24px;
+    height: 8px;
+    position: relative;
+    display: inline-block;
+    margin-left: 17.6px;
+    top: -3px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s ease;
+    pointer-events: auto;
+    z-index: 5;
+}
+
+.ttbbetblock:hover {
+    background-color: rgba(223, 183, 108, 0.7);
+    box-shadow: 0 0 6px rgba(223, 183, 108, 0.8);
+}
+
+.wlrtl {
+    position: relative;
+    display: inline-block;
+    width: 8px;
+    height: 266px;
+    top: -3px;
+    margin-left: 37px;
+    pointer-events: none;
+}
+
+#wlrtl_2, #wlrtl_3, #wlrtl_6, #wlrtl_9, #wlrtl_11 {
+    margin-left: 33px;
+}
+#wlrtl_4, #wlrtl_5, #wlrtl_7, #wlrtl_8, #wlrtl_10 {
+    margin-left: 34px;
+}
+
+.rtlbb1, .rtlbb2, .rtlbb3 {
+    height: 40px;
+    margin-top: 44px;
+    width: 8px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s ease;
+    pointer-events: auto;
+    z-index: 5;
+}
+
+.rtlbb1:hover, .rtlbb2:hover, .rtlbb3:hover {
+    background-color: rgba(223, 183, 108, 0.7);
+    box-shadow: 0 0 6px rgba(223, 183, 108, 0.8);
+}
+
+.wlcb {
+    position: absolute;
+    width: 477px;
+    height: 16px;
+    top: 265px;
+    margin-left: 17px;
+    pointer-events: none;
+}
+
+#wlcb_2 {
+    top: 353px;
+}
+
+.cbbb {
+    width: 12px;
+    height: 12px;
+    position: relative;
+    display: inline-block;
+    margin-left: 29.8px;
+    margin-top: 2px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.15s ease;
+    pointer-events: auto;
+    z-index: 6;
+}
+
+.cbbb:hover {
+    background-color: rgba(223, 183, 108, 0.85);
+    box-shadow: 0 0 8px rgba(223, 183, 108, 0.9);
+    transform: scale(1.25);
+}
+
+#cbbb_1, #cbbb_4, #cbbb_5, #cbbb_7, #cbbb_9, #cbbb_11, #cbbb_12, #cbbb_15, #cbbb_16, #cbbb_18, #cbbb_20, #cbbb_22 {
+    margin-left: 29.5px;
+}
+#cbbb_3, #cbbb_14 { margin-left: 29px; }
+#cbbb_6, #cbbb_17 { margin-left: 30.5px; }
+#cbbb_8, #cbbb_10, #cbbb_19, #cbbb_21 { margin-left: 29.8px; }
+
+/* 1 to 18 y 19 to 36 */
+.bbtop {
+    margin-left: 1px;
+    display: flex;
+}
+
+.bbtoptwo {
+    position: relative;
+    flex: 1;
+    border: 1px solid rgba(199, 167, 109, 0.3);
+    padding: 9px 4px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: var(--font-serif);
+    color: #ede8df;
+    letter-spacing: 1px;
+    cursor: pointer;
+    background: rgba(20, 24, 28, 0.4);
+    transition: all 0.2s ease;
+}
+
+.bbtoptwo:hover {
+    background: rgba(199, 167, 109, 0.2);
+    border-color: var(--brass-accent);
+}
+
+/* Casillas de Números 0 al 36 */
+.number_board {
+    margin-left: 1px;
+    position: relative;
+}
+
+.number_0 {
+    position: absolute;
+    border: 1.5px solid rgba(199, 167, 109, 0.4);
+    margin-left: -58px;
+    margin-top: 0px;
+    padding: 120px 20px;
+    border-bottom-left-radius: 80px;
+    border-top-left-radius: 80px;
+    background: linear-gradient(135deg, #065f46 0%, #044331 100%);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
+}
+
+.number_0:hover {
+    background: linear-gradient(135deg, #087959 0%, #065f46 100%);
+    border-color: var(--brass-accent);
+    box-shadow: inset 0 0 18px rgba(199, 167, 109, 0.45);
+}
+
+.number_block {
+    position: relative;
+    width: 40px;
+    border: 1px solid rgba(199, 167, 109, 0.25);
+    text-align: center;
+    display: inline-block;
+    vertical-align: top;
+    margin: 0 -0.2px;
+    padding: 31px 0px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    user-select: none;
+}
+
+.number_block:hover {
+    border-color: var(--brass-accent);
+    box-shadow: inset 0 0 16px rgba(199, 167, 109, 0.5), 0 0 8px rgba(199, 167, 109, 0.35);
+    z-index: 5;
+    filter: brightness(1.2);
+}
+
+.redNum {
+    background: linear-gradient(180deg, #991b1b 0%, #7f1d1d 100%);
+    color: #ffffff;
+}
+
+.blackNum {
+    background: linear-gradient(180deg, #1e242b 0%, #111519 100%);
+    color: #ffffff;
+}
+
+.nbn {
+    font-size: 17px;
+    font-weight: 700;
+    font-family: var(--font-serif);
+    letter-spacing: 1px;
+    transform: rotate(-90deg);
+    display: block;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    user-select: none;
+}
+
+.number_0 .nbn {
+    color: #ede8df;
+    font-size: 20px;
+}
+
+/* Columna 2 to 1 */
+.tt1_block {
+    border: 1.5px solid rgba(199, 167, 109, 0.35);
+    width: 65px;
+    position: absolute;
+    margin-left: 500px;
+    padding: 30.5px 0px;
+    margin-top: -89.5px;
+    cursor: pointer;
+    background: rgba(20, 24, 28, 0.5);
+    color: #ede8df;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.tt1_block:hover {
+    background: rgba(199, 167, 109, 0.2);
+    border-color: var(--brass-accent);
+}
+
+/* Docenas (1 to 12, 13 to 24, 25 to 36) */
+.bo3_board, .oto_board {
+    width: 504px;
+    margin-left: 1px;
+    display: flex;
+}
+
+.bo3_block {
+    position: relative;
+    flex: 1;
+    border: 1px solid rgba(199, 167, 109, 0.3);
+    padding: 8px 5px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 14px;
+    font-family: var(--font-serif);
+    color: #ede8df;
+    letter-spacing: 1px;
+    cursor: pointer;
+    background: rgba(20, 24, 28, 0.4);
+    transition: all 0.2s ease;
+}
+
+.bo3_block:hover {
+    background: rgba(199, 167, 109, 0.2);
+    border-color: var(--brass-accent);
+}
+
+/* Apuestas de Suerte Sencilla (EVEN, RED, BLACK, ODD) */
+.oto_block {
+    position: relative;
+    flex: 1;
+    border: 1px solid rgba(199, 167, 109, 0.3);
+    padding: 8px 5px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 14px;
+    font-family: var(--font-serif);
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.oto_block:hover {
+    border-color: var(--brass-accent);
+    box-shadow: inset 0 0 10px rgba(199, 167, 109, 0.3);
+}
+
+/* Selector de Fichas interno del Tablero */
+.chipDeck {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    margin-top: 6px;
+}
+
+.cdChip {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    transition: all 0.2s ease;
+    border: 2px dashed rgba(255, 255, 255, 0.7);
+}
+
+.cdChip:hover {
+    transform: translateY(-2px) scale(1.08);
+}
+
+.cdChipActive {
+    transform: translateY(-4px) scale(1.15) !important;
+    box-shadow: 0 6px 14px rgba(199, 167, 109, 0.7), 0 0 10px var(--brass-accent) !important;
+    border-color: #ffffff !important;
+}
+
+.cdChipSpan {
+    font-size: 11px;
+    font-weight: 800;
+    font-family: var(--font-sans);
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.cdChip.red { background: linear-gradient(135deg, #ef4444, #991b1b); }
+.cdChip.blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+.cdChip.orange { background: linear-gradient(135deg, #f97316, #c2410c); }
+.cdChip.gold { background: linear-gradient(135deg, #eab308, #a16207); }
+.cdChip.clearBet {
+    background: linear-gradient(135deg, #4b5563, #1f2937);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: auto;
+    padding: 0 10px;
+    border-radius: 14px;
+}
+.cdChip.clearBet .cdChipSpan {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+}
+
+/* Indicadores de Banco y Apuesta en el Tablero */
+.bankContainer {
+    display: none; /* Se visualiza en la barra inferior para consistencia con Blackjack */
+}
+
+/* Tira de Números Anteriores / Historial */
+.pnBlock {
+    margin-top: 4px;
+    padding: 6px 10px;
+    background: rgba(15, 20, 24, 0.85);
+    border: 1px solid rgba(199, 167, 109, 0.25);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pnBlock::before {
+    content: "HISTORIAL:";
+    font-family: var(--font-serif);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--brass-accent);
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+#pnContent {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    width: 100%;
+    scrollbar-width: thin;
+    padding: 2px 0;
+}
+
+#pnContent::-webkit-scrollbar {
+    height: 4px;
+}
+#pnContent::-webkit-scrollbar-thumb {
+    background: rgba(199, 167, 109, 0.3);
+    border-radius: 2px;
+}
+
+#pnContent span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    color: #ffffff;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.pnRed { background: linear-gradient(135deg, #ef4444, #991b1b); }
+.pnBlack { background: linear-gradient(135deg, #374151, #111827); border: 1px solid rgba(255, 255, 255, 0.15); }
+.pnGreen { background: linear-gradient(135deg, #10b981, #047857); }
+
+/* Fichas apostadas sobre el tablero */
+.chip {
+    width: 22px;
+    height: 22px;
+    background-color: #fff;
+    border: 2px dashed rgba(255, 255, 255, 0.9);
+    border-radius: 100%;
+    position: absolute;
+    z-index: 15;
+    pointer-events: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: chipDrop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes chipDrop {
+    0% { transform: translate(-50%, calc(-50% - 6px)) scale(1.4); opacity: 0; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+.chipSpan {
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 10px;
+    font-family: var(--font-sans);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.chip.gold { background: linear-gradient(135deg, #f59e0b, #b45309); }
+.chip.red { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+.chip.orange { background: linear-gradient(135deg, #f97316, #c2410c); }
+.chip.blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+
+/* Ajustes de posición de fichas perfectamente centradas sobre las casillas */
+.tt1_block .chip,
+.number_block .chip,
+.bbtoptwo .chip,
+.number_0 .chip,
+.bo3_block .chip,
+.oto_block .chip,
+.cbbb .chip,
+.ttbbetblock .chip,
+.rtlbb1 .chip,
+.rtlbb2 .chip,
+.rtlbb3 .chip {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   MODAL DE NOTIFICACIÓN DE PREMIOS / BANCARROTA
+   -------------------------------------------------------------------------- */
+#notification {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 440px;
+    background: rgba(19, 23, 27, 0.96);
+    z-index: 100;
+    border: 2px solid var(--brass-accent);
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(199, 167, 109, 0.3);
+    padding: 24px;
+    text-align: center;
+    backdrop-filter: blur(8px);
+    transition: opacity 0.4s ease;
+    animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    0% { transform: translate(-50%, -50%) scale(0.85); opacity: 0; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+.nSpan {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.nsnumber {
+    font-size: 38px;
+    font-weight: 800;
+    font-family: var(--font-serif);
+    color: var(--brass-accent) !important;
+}
+
+.nSpan > span {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 700;
+    color: #ede8df;
+    letter-spacing: 1px;
+}
+
+.nsWin {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 14px;
+    width: 100%;
+}
+
+.nsWinBlock {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(199, 167, 109, 0.25);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #c7a76d;
+}
+
+.nBtn {
+    margin-top: 20px;
+    padding: 12px 24px;
+    font-size: 15px;
+    font-family: var(--font-serif);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-align: center;
+    background: linear-gradient(135deg, #c7a76d 0%, #8c6827 100%);
+    color: #111315;
+    border-radius: 6px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    display: inline-block;
+}
+
+.nBtn:hover {
+    background: linear-gradient(135deg, #dfb76c 0%, #a67c33 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(199, 167, 109, 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   BARRA DE ACCIONES INFERIOR (ESPECÍFICA DE RULETA)
+   -------------------------------------------------------------------------- */
+.roulette-action-bar-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 16px;
+}
+
+.roulette-status-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 190px;
+}
+
+.roulette-status-label {
+    font-size: 11px;
+    color: #8c939e;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.roulette-status-val {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--brass-accent);
+}
+
+.roulette-bet-selector {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.roulette-chips-hud {
+    display: flex;
+    gap: 12px;
+}
+
+.roulette-action-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-roulette-spin {
+    background: linear-gradient(135deg, #c7a76d 0%, #8c6827 100%);
+    color: #111315;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    min-width: 120px;
+}
+
+.btn-roulette-spin:hover:not(:disabled) {
+    background: linear-gradient(135deg, #dfb76c 0%, #a67c33 100%);
+    box-shadow: 0 4px 16px rgba(199, 167, 109, 0.4);
+}
+
+.btn-roulette-clear {
+    background: #2a2223;
+    border-color: #523537;
+    color: #e5b4b7;
+}
+
+.btn-roulette-clear:hover:not(:disabled) {
+    background: #3d2c2e;
+    border-color: #7f3339;
+}
+
+.btn-roulette-double {
+    background: #1c262d;
+    border-color: #2b4c59;
+    color: #a3c9d9;
+}
+
+.btn-roulette-double:hover:not(:disabled) {
+    background: #243540;
+    border-color: #3e6d80;
+}
+
+/* Ocultar el botón original flotante .spinBtn ya que usamos el botón en la barra de control */
+.spinBtn {
+    display: none !important;
+}
+
+/* Indicador de ayuda en tapete */
+.roulette-board-hint {
+    font-size: 11px;
+    color: rgba(214, 188, 131, 0.5);
+    text-align: center;
+    margin-top: 6px;
+    font-family: var(--font-sans);
+    letter-spacing: 0.5px;
+}

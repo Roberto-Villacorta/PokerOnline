@@ -173,8 +173,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let avatarSeleccionado = 'navy';
 
     function mostrarSeleccionJuego() {
-        if (INTERFAZ.modalSeleccionJuego) INTERFAZ.modalSeleccionJuego.style.display = 'flex';
-        if (INTERFAZ.modalLobby) INTERFAZ.modalLobby.style.display = 'none';
+        if (INTERFAZ.modalSeleccionJuego) {
+            INTERFAZ.modalSeleccionJuego.style.display = 'flex';
+            if (INTERFAZ.modalLobby) INTERFAZ.modalLobby.style.display = 'none';
+        } else {
+            window.location.href = 'index.html';
+        }
     }
 
     function abrirModoPoker() {
@@ -229,10 +233,24 @@ document.addEventListener('DOMContentLoaded', () => {
     if (INTERFAZ.botonVolverSeleccionJuego) {
         INTERFAZ.botonVolverSeleccionJuego.addEventListener('click', mostrarSeleccionJuego);
     }
+    if (INTERFAZ.botonSalir) {
+        INTERFAZ.botonSalir.addEventListener('click', () => {
+            if (confirm('¿Deseas salir al menú principal de juegos?')) {
+                window.location.href = 'index.html';
+            }
+        });
+    }
 
     const parametrosUrl = new URLSearchParams(window.location.search);
     const parametroSala = parametrosUrl.get('sala') || parametrosUrl.get('room');
-    if (parametroSala) {
+    if (!INTERFAZ.modalSeleccionJuego) {
+        // Ejecución en página independiente poker.html
+        abrirModoPoker();
+        if (parametroSala) {
+            cambiarPestanaLobby('unirse');
+            if (INTERFAZ.campoCodigoSala) INTERFAZ.campoCodigoSala.value = parametroSala.toUpperCase();
+        }
+    } else if (parametroSala) {
         abrirModoPoker();
         cambiarPestanaLobby('unirse');
         INTERFAZ.campoCodigoSala.value = parametroSala.toUpperCase();
