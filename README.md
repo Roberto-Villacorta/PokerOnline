@@ -62,3 +62,10 @@ python -m http.server 3000
 ```
 
 Y abrir en tu navegador `http://localhost:3000`.
+
+---
+
+## Créditos y Agradecimientos
+
+- **Buscaminas Clásico**: Proporcionado e integrado como minijuego recreativo (sin apuestas), desarrollado originalmente por [mraldev](https://github.com/mraldev) en GitHub.
+

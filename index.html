@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Club de Casino | Póquer, Blackjack & Ruleta</title>
-    <meta name="description" content="Portal principal de Club de Casino. Elige entre Póquer Texas Hold'em multijugador, Blackjack 21 tradicional y Ruleta Europea.">
+    <title>Club de Casino | Póquer, Blackjack, Ruleta & Buscaminas</title>
+    <meta name="description" content="Portal principal de Club de Casino. Elige entre Póquer Texas Hold'em multijugador, Blackjack 21 tradicional, Ruleta Europea y Buscaminas clásico recreativo.">
     
     <!-- Fuentes de Google -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -102,12 +102,31 @@
                     JUGAR A LA RULETA
                 </a>
             </div>
+
+            <!-- TARJETA BUSCAMINAS -->
+            <div class="game-card portal-card" id="cardSelectMines" onclick="window.location.href='buscaminas.html'">
+                <div class="game-card-badge">RECREATIVO</div>
+                <div class="game-card-icon">💣</div>
+                <h3>Buscaminas</h3>
+                <p class="game-card-desc">Modo clásico recreativo sin apuestas. Despeja el campo evitando las minas ocultas.</p>
+                <ul class="game-card-features">
+                    <li><span class="feature-dot">♦</span> Sin apuestas ni riesgo de fichas</li>
+                    <li><span class="feature-dot">♦</span> Tablero clásico 10x10 con banderas</li>
+                    <li><span class="feature-dot">♦</span> Despeje en cascada y acorde</li>
+                </ul>
+                <a href="buscaminas.html" class="btn-primary game-card-btn btn-mines-theme" onclick="event.stopPropagation()">
+                    JUGAR AL BUSCAMINAS
+                </a>
+            </div>
         </div>
     </main>
 
     <!-- PIE DE PÁGINA -->
     <footer class="portal-footer-watermark">
-        CLUB DE CASINO • PÓQUER, BLACKJACK Y RULETA EUROPEA • MULTIJUGADOR Y JUEGO LOCAL
+        <div>CLUB DE CASINO • PÓQUER, BLACKJACK, RULETA Y BUSCAMINAS • MULTIJUGADOR Y JUEGO LOCAL</div>
+        <div style="margin-top: 6px; font-size: 11px; opacity: 0.8;">
+            Buscaminas proporcionado por <a href="https://github.com/mraldev" target="_blank" rel="noopener noreferrer" style="color: #c7a76d; text-decoration: underline;">mraldev</a> (GitHub)
+        </div>
     </footer>
 
     <!-- SCRIPTS -->
