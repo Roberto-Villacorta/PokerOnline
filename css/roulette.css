@@ -75,6 +75,7 @@
     aspect-ratio: 16 / 9;
     max-height: 76vh;
     padding: 10px;
+    margin: auto 0;
 }
 
 .roulette-table-outer {
@@ -137,21 +138,156 @@
 
 @media (max-width: 1100px) {
     .roulette-stage {
-        transform: scale(0.9);
+        transform: scale(0.88);
+        gap: 24px;
     }
 }
 
 @media (max-width: 950px) {
+    .roulette-table-wrap {
+        aspect-ratio: auto;
+        height: auto;
+        min-height: 480px;
+        max-height: none;
+        padding: 6px;
+    }
+
+    .roulette-table-outer {
+        position: relative;
+        inset: auto;
+        border-radius: clamp(28px, 5vw, 60px);
+        padding: 10px;
+        width: 100%;
+        height: auto;
+    }
+
+    .roulette-felt {
+        border-radius: clamp(22px, 4vw, 50px);
+        padding: 16px 8px;
+        overflow: visible;
+        height: auto;
+        min-height: auto;
+    }
+
+    .roulette-felt .felt-watermark {
+        display: none;
+    }
+
     .roulette-stage {
-        transform: scale(0.8);
+        transform: scale(0.78);
+        gap: 18px;
     }
 }
 
-@media (max-width: 800px) {
+@media (max-width: 820px) {
     .roulette-stage {
         flex-direction: column;
-        gap: 16px;
+        gap: 8px;
         transform: scale(0.68);
+    }
+
+    .roulette-wheel-wrapper {
+        transform: scale(0.75);
+        margin: -35px 0;
+    }
+}
+
+@media (max-width: 600px) {
+    .roulette-table-wrap {
+        padding: 4px 2px;
+    }
+
+    .roulette-table-outer {
+        border-radius: 26px;
+        padding: 6px;
+    }
+
+    .roulette-felt {
+        border-radius: 20px;
+        padding: 10px 4px;
+    }
+
+    .roulette-stage {
+        transform: scale(0.60);
+        gap: 4px;
+    }
+
+    .roulette-wheel-wrapper {
+        transform: scale(0.64);
+        margin: -50px 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .roulette-stage {
+        transform: scale(0.54);
+    }
+
+    .roulette-wheel-wrapper {
+        transform: scale(0.58);
+        margin: -58px 0;
+    }
+}
+
+@media (max-width: 380px) {
+    .roulette-stage {
+        transform: scale(0.48);
+    }
+
+    .roulette-wheel-wrapper {
+        transform: scale(0.52);
+        margin: -66px 0;
+    }
+}
+
+@media (max-width: 330px) {
+    .roulette-stage {
+        transform: scale(0.42);
+    }
+
+    .roulette-wheel-wrapper {
+        transform: scale(0.46);
+        margin: -74px 0;
+    }
+}
+
+/* Pantallas apaisadas con poca altura (ej: móviles horizontales o ventanas bajas) */
+@media (max-height: 600px) and (min-width: 601px) {
+    .roulette-table-wrap {
+        aspect-ratio: auto;
+        height: auto;
+        min-height: auto;
+        max-height: none;
+        padding: 4px;
+    }
+
+    .roulette-table-outer {
+        position: relative;
+        inset: auto;
+        border-radius: 28px;
+        padding: 8px;
+        width: 100%;
+    }
+
+    .roulette-felt {
+        border-radius: 22px;
+        padding: 8px 6px;
+        overflow: visible;
+    }
+
+    .roulette-felt .felt-watermark {
+        display: none;
+    }
+
+    .roulette-stage {
+        flex-direction: row;
+        gap: 16px;
+        transform: scale(0.62);
+    }
+
+    .roulette-wheel-wrapper {
+        transform: scale(0.80);
+        margin: 0;
     }
 }
 
@@ -895,12 +1031,13 @@
     left: 50%;
     transform: translate(-50%, -50%);
     width: 440px;
+    max-width: min(440px, 92vw);
     background: rgba(19, 23, 27, 0.96);
     z-index: 100;
     border: 2px solid var(--brass-accent);
     border-radius: 14px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(199, 167, 109, 0.3);
-    padding: 24px;
+    padding: 22px 18px;
     text-align: center;
     backdrop-filter: blur(8px);
     transition: opacity 0.4s ease;
@@ -916,11 +1053,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .nsnumber {
-    font-size: 38px;
+    font-size: clamp(28px, 6vw, 38px);
     font-weight: 800;
     font-family: var(--font-serif);
     color: var(--brass-accent) !important;
@@ -928,7 +1065,7 @@
 
 .nSpan > span {
     font-family: var(--font-serif);
-    font-size: 22px;
+    font-size: clamp(16px, 4vw, 22px);
     font-weight: 700;
     color: #ede8df;
     letter-spacing: 1px;
@@ -937,25 +1074,26 @@
 .nsWin {
     display: flex;
     justify-content: center;
-    gap: 12px;
-    margin-top: 14px;
+    gap: 10px;
+    margin-top: 12px;
     width: 100%;
+    flex-wrap: wrap;
 }
 
 .nsWinBlock {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(199, 167, 109, 0.25);
     border-radius: 8px;
-    padding: 8px 14px;
-    font-size: 13px;
+    padding: 6px 12px;
+    font-size: 12px;
     font-weight: 600;
     color: #c7a76d;
 }
 
 .nBtn {
-    margin-top: 20px;
-    padding: 12px 24px;
-    font-size: 15px;
+    margin-top: 18px;
+    padding: 10px 22px;
+    font-size: 14px;
     font-family: var(--font-serif);
     font-weight: 700;
     letter-spacing: 1px;
@@ -1070,4 +1208,146 @@
     margin-top: 6px;
     font-family: var(--font-sans);
     letter-spacing: 0.5px;
+}
+
+/* --------------------------------------------------------------------------
+   ADAPTACIÓN RESPONSIVE DE LA BARRA DE RULETA (TABLETS, MÓVILES Y PANTALLAS PEQUEÑAS)
+   -------------------------------------------------------------------------- */
+@media (max-width: 950px) {
+    .roulette-action-bar-content {
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .roulette-status-info {
+        text-align: center;
+        align-items: center;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .roulette-status-val {
+        font-size: 12px;
+    }
+
+    .roulette-bet-selector {
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .roulette-bet-selector .presets-row {
+        gap: 6px;
+        width: auto;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .btn-roulette-chip {
+        padding: 5px 10px;
+        font-size: 11px;
+        min-width: 36px;
+    }
+
+    .roulette-chips-hud {
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .roulette-action-controls {
+        width: 100%;
+        display: flex;
+        gap: 8px;
+        justify-content: space-between;
+    }
+
+    .roulette-action-controls .btn-action {
+        flex: 1 1 0;
+        min-width: 0;
+        max-width: none;
+        height: 42px;
+        padding: 4px 6px;
+    }
+
+    .btn-roulette-spin {
+        min-width: 0;
+        flex: 1.2 1 0;
+    }
+
+    .btn-action .main-label {
+        font-size: clamp(10.5px, 2.8vw, 12px);
+        white-space: nowrap;
+    }
+
+    .btn-action .sub-label {
+        font-size: clamp(8px, 2vw, 9px);
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .roulette-action-bar-content {
+        gap: 6px;
+    }
+
+    .roulette-status-label {
+        font-size: 9.5px;
+    }
+
+    .roulette-status-val {
+        font-size: 11px;
+    }
+
+    .roulette-bet-selector {
+        gap: 6px;
+    }
+
+    .roulette-bet-selector .presets-row {
+        gap: 4px;
+    }
+
+    .btn-roulette-chip {
+        padding: 4px 7px;
+        font-size: 10px;
+        min-width: 32px;
+    }
+
+    .roulette-chips-hud {
+        gap: 6px;
+    }
+
+    .bj-chip-badge {
+        padding: 2.5px 7px;
+        font-size: 10px;
+    }
+
+    .roulette-action-controls {
+        gap: 5px;
+    }
+
+    .roulette-action-controls .btn-action {
+        height: 38px;
+        padding: 2px 4px;
+    }
+
+    .btn-action .main-label {
+        font-size: 10px;
+    }
+
+    .btn-action .sub-label {
+        font-size: 7.5px;
+    }
+}
+
+@media (max-height: 620px) {
+    .roulette-action-bar-content {
+        gap: 4px;
+    }
+
+    .roulette-action-controls .btn-action {
+        height: 34px;
+    }
 }

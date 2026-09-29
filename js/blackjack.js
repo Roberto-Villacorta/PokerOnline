@@ -333,8 +333,16 @@ window.ControladorBlackjack = {
 
         // Renderizar Cartas Jugador
         v.cartasJugador.innerHTML = '';
-        motor.cartas_jugador.forEach(carta => {
-            v.cartasJugador.appendChild(this.crearElementoCarta(carta));
+        const jugadorMasDeTres = motor.cartas_jugador.length > 3;
+        if (jugadorMasDeTres) {
+            v.cartasJugador.classList.add('stacked');
+        } else {
+            v.cartasJugador.classList.remove('stacked');
+        }
+        motor.cartas_jugador.forEach((carta, index) => {
+            const cartaEl = this.crearElementoCarta(carta);
+            cartaEl.style.zIndex = index + 1;
+            v.cartasJugador.appendChild(cartaEl);
         });
         if (v.puntosJugador) {
             v.puntosJugador.textContent = `Puntos: ${motor.calcularPuntos(motor.cartas_jugador)}`;

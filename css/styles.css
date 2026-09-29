@@ -199,7 +199,20 @@ body {
     align-items: center;
     position: relative;
     padding: 16px 20px;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(199, 167, 109, 0.3) transparent;
+    -webkit-overflow-scrolling: touch;
+}
+
+.game-viewport::-webkit-scrollbar {
+    width: 6px;
+}
+
+.game-viewport::-webkit-scrollbar-thumb {
+    background: rgba(199, 167, 109, 0.3);
+    border-radius: 3px;
 }
 
 .poker-table-wrap {
@@ -1708,12 +1721,21 @@ body {
         padding: 8px 10px;
     }
 
-    .poker-table-wrap,
-    .blackjack-table-wrap {
+    .poker-table-wrap {
         aspect-ratio: auto;
         min-height: 430px;
         max-height: calc(100vh - 170px);
         width: 100%;
+        margin: auto 0;
+    }
+
+    .blackjack-table-wrap {
+        aspect-ratio: auto;
+        min-height: clamp(280px, 48vh, 420px);
+        max-height: none;
+        height: auto;
+        width: 100%;
+        margin: auto 0;
     }
 
     .poker-table-outer,
@@ -1848,61 +1870,76 @@ body {
     .seat-5 { bottom: 10%; right: 1%; }
 
     /* Mesa de Blackjack Responsive */
+    .bj-table-outer {
+        border-radius: clamp(30px, 6vw, 60px);
+        padding: 10px;
+    }
+
+    .bj-felt {
+        border-radius: clamp(24px, 5vw, 52px);
+        padding: 12px 16px;
+    }
+
+    .bj-felt .felt-watermark {
+        display: none;
+    }
+
     .bj-chips-hud {
-        top: 12px;
-        gap: 8px;
+        top: 8px;
+        gap: 6px;
     }
 
     .bj-chip-badge {
-        padding: 4px 10px;
-        font-size: 11px;
+        padding: 3px 8px;
+        font-size: 10.5px;
     }
 
     .bj-chip-label {
-        font-size: 10px;
+        font-size: 9.5px;
     }
 
     .bj-dealer-zone {
-        margin-top: 36px;
+        margin-top: 18px;
     }
 
     .bj-zone {
-        gap: 8px;
+        gap: 6px;
     }
 
     .bj-player-header {
-        padding: 4px 12px;
-        gap: 8px;
+        padding: 3px 10px;
+        gap: 6px;
     }
 
     .bj-player-title {
-        font-size: 11px;
+        font-size: 10.5px;
         letter-spacing: 1px;
     }
 
     .bj-points-badge {
-        font-size: 10px;
-        padding: 2px 8px;
+        font-size: 9.5px;
+        padding: 2px 6px;
     }
 
     .bj-cards-container {
-        min-height: 82px;
-        gap: 8px;
+        min-height: 72px;
+        gap: 6px;
+        padding: 2px 0;
     }
 
     .bj-cards-container .poker-card {
-        width: 56px;
-        height: 80px;
-        padding: 4px;
+        width: 52px;
+        height: 74px;
+        padding: 3px;
     }
 
     .bj-cards-container.stacked .poker-card:not(:first-child) {
-        margin-left: -32px;
+        margin-left: -28px;
     }
 
     .bj-result-message {
-        font-size: 17px;
-        padding: 10px 22px;
+        font-size: 15px;
+        padding: 8px 18px;
     }
 
     /* Panel Inferior de Acciones */
@@ -1983,30 +2020,47 @@ body {
         width: 100%;
         flex-direction: row;
         justify-content: center;
+        align-items: center;
         gap: 8px;
+        flex-wrap: wrap;
     }
 
     .bj-bet-selector .presets-row {
-        gap: 4px;
+        gap: 5px;
         width: auto;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
     .btn-bj-bet {
         padding: 5px 8px;
         font-size: 11px;
+        min-width: 38px;
     }
 
     .bj-action-controls {
         width: 100%;
         display: flex;
-        gap: 8px;
+        gap: 6px;
+        justify-content: space-between;
     }
 
     .bj-action-controls .btn-action {
-        flex: 1;
+        flex: 1 1 0;
         min-width: 0;
         max-width: none;
-        height: 44px;
+        height: 42px;
+        padding: 4px 6px;
+    }
+
+    .bj-action-controls .btn-action .main-label {
+        font-size: clamp(10.5px, 2.8vw, 12px);
+        white-space: nowrap;
+    }
+
+    .bj-action-controls .btn-action .sub-label {
+        font-size: clamp(8px, 2vw, 9px);
+        white-space: nowrap;
     }
 
     /* Modales y Lobby */
@@ -2069,9 +2123,13 @@ body {
         padding: 6px 4px;
     }
 
-    .poker-table-wrap,
-    .blackjack-table-wrap {
+    .poker-table-wrap {
         min-height: 380px;
+    }
+
+    .blackjack-table-wrap {
+        min-height: clamp(240px, 44vh, 340px);
+        margin: auto 0;
     }
 
     .poker-table-outer,
@@ -2174,64 +2232,149 @@ body {
 
     /* Blackjack en móvil pequeño */
     .bj-dealer-zone {
-        margin-top: 24px;
+        margin-top: 14px;
     }
 
     .bj-chips-hud {
-        top: 8px;
-        gap: 6px;
-    }
-
-    .bj-chip-badge {
-        padding: 3px 7px;
-        font-size: 10px;
-    }
-
-    .bj-cards-container {
-        min-height: 68px;
+        top: 6px;
         gap: 5px;
     }
 
+    .bj-chip-badge {
+        padding: 2.5px 6px;
+        font-size: 9.5px;
+    }
+
+    .bj-cards-container {
+        min-height: 60px;
+        gap: 4px;
+    }
+
     .bj-cards-container .poker-card {
-        width: 48px;
-        height: 68px;
-        padding: 2px 3px;
+        width: 44px;
+        height: 62px;
+        padding: 2px;
     }
 
     .bj-cards-container.stacked .poker-card:not(:first-child) {
-        margin-left: -26px;
+        margin-left: -24px;
     }
 
     .bj-result-message {
-        font-size: 14px;
-        padding: 8px 16px;
+        font-size: 13px;
+        padding: 6px 14px;
     }
 
     /* Controles de Acción */
     .action-bar-wrap {
-        padding: 5px 6px;
+        padding: 6px 6px;
+        gap: 6px;
+    }
+
+    .bj-action-controls {
+        gap: 5px;
     }
 
     .btn-action {
         height: 38px;
+        padding: 2px 4px;
     }
 
     .btn-action .main-label {
-        font-size: 11px;
+        font-size: 10.5px;
     }
 
     .btn-action .sub-label {
-        font-size: 8px;
+        font-size: 7.5px;
     }
 
     .preset-btn {
-        font-size: 9px;
-        padding: 3px 1px;
+        font-size: 8.5px;
+        padding: 3px 2px;
     }
 
     .btn-bj-bet {
+        padding: 4px 5px;
+        font-size: 9.5px;
+        min-width: 32px;
+    }
+}
+
+/* PANTALLAS CON ALTURA MUY REDUCIDA (VENTANAS BAJAS / MÓVILES EN HORIZONTAL) */
+@media (max-height: 620px) {
+    .top-bar {
+        padding: 4px 12px;
+    }
+
+    .brand-title {
+        font-size: 13px;
+    }
+
+    .brand-subtitle {
+        display: none;
+    }
+
+    .icon-btn {
+        width: 28px;
+        height: 28px;
+    }
+
+    .game-viewport {
         padding: 4px 6px;
-        font-size: 10px;
+    }
+
+    .action-bar-wrap {
+        padding: 4px 8px;
+        gap: 4px;
+    }
+
+    .btn-action {
+        height: 34px;
+    }
+
+    .blackjack-table-wrap {
+        min-height: clamp(220px, 58vh, 320px);
+        max-height: calc(100vh - 110px);
+        margin: auto 0;
+    }
+
+    .bj-table-outer {
+        padding: 6px;
+        border-radius: 30px;
+    }
+
+    .bj-felt {
+        padding: 8px 12px;
+        border-radius: 26px;
+    }
+
+    .bj-felt .felt-watermark {
+        display: none;
+    }
+
+    .bj-dealer-zone {
+        margin-top: 8px;
+    }
+
+    .bj-zone {
+        gap: 4px;
+    }
+
+    .bj-player-header {
+        padding: 2px 8px;
+    }
+
+    .bj-cards-container {
+        min-height: 52px;
+    }
+
+    .bj-cards-container .poker-card {
+        width: 38px;
+        height: 54px;
+    }
+
+    .bj-cards-container.stacked .poker-card:not(:first-child) {
+        margin-left: -20px;
     }
 }
 
