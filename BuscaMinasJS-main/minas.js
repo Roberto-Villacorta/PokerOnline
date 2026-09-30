@@ -1,10 +1,10 @@
-// Desarrollado originalmente por Marcos Alonso Álvarez (@mraldev - https://github.com/mraldev)
-// Adaptado para Club de Casino (Modo Recreativo sin apuestas)
+// Desarrollado por Marcos Alonso Álvarez
 
 let CANTIDAD_BOMBAS = 10
 let TAMANYO_TABLERO = 10
 let casillasDescubiertas = 0
 let partida_terminada = false
+let bombasGeneradas = false
 
 /**
  * Array tridimensional que sirve para manejar el tablero de forma oculta e interna mediante el javascript
@@ -16,8 +16,16 @@ let partida_terminada = false
  * a la casilla en cuestión, pudiendo ir desde 0 si no hay bombas adyacentes hasta un teórico 8. La única 
  * excepción es el número 9 que representa la bomba en si
  */
-let arrayTablero = []
-let casillasHtml = []
+let arrayTablero = Array.from({ length: 2 }, () =>
+    Array.from({ length: TAMANYO_TABLERO }, () =>
+        Array(TAMANYO_TABLERO).fill(0)
+    )
+)
+
+let casillasHtml = Array.from(
+    { length: TAMANYO_TABLERO },
+    () => Array(TAMANYO_TABLERO)
+)
 
 /**
  * Caché con los vecinos válidos de cada casilla
@@ -27,41 +35,10 @@ let casillasHtml = []
 let vecinosCache = null
 
 document.addEventListener("DOMContentLoaded", () => {
+
     precalcularVecinos()
-    iniciarPartida()
-
-    const btnReiniciar = document.getElementById("btnReiniciar")
-    if (btnReiniciar) {
-        btnReiniciar.addEventListener("click", () => {
-            iniciarPartida()
-        })
-    }
-})
-
-function iniciarPartida() {
-    casillasDescubiertas = 0
-    partida_terminada = false
-
-    const mensaje = document.getElementById("mensaje")
-    if (mensaje) {
-        mensaje.textContent = ""
-    }
-
-    arrayTablero = Array.from({ length: 2 }, () =>
-        Array.from({ length: TAMANYO_TABLERO }, () =>
-            Array(TAMANYO_TABLERO).fill(0)
-        )
-    )
-
-    casillasHtml = Array.from(
-        { length: TAMANYO_TABLERO },
-        () => Array(TAMANYO_TABLERO)
-    )
 
     const tableroHtml = document.getElementById("tablero")
-    if (!tableroHtml) return
-
-    tableroHtml.innerHTML = ""
 
     for (let fila = 0; fila < arrayTablero[0].length; fila++) {
         for (let columna = 0; columna < arrayTablero[0][0].length; columna++) {
@@ -70,6 +47,7 @@ function iniciarPartida() {
             casilla.className = "casilla"
 
             casilla.addEventListener("mousedown", (event) => {
+
                 pulsarCasilla(fila, columna, event)
             })
 
@@ -78,12 +56,11 @@ function iniciarPartida() {
             })
 
             casillasHtml[fila][columna] = casilla
+
             tableroHtml.appendChild(casilla)
         }
     }
-
-    rellenarTablero()
-}
+})
 
 /**
  * Calcula y guarda en caché los vecinos de cada casilla del tablero
@@ -128,15 +105,16 @@ const precalcularVecinos = () => {
 const obtenerVecinos = (y, x) => vecinosCache[y][x]
 
 const pulsarCasilla = (y, x, event) => {
-    if (event.button === 0) {
-        pulsadaDescubrir(y, x);
-    } else if (event.button === 2) {
-        pulsadaBandera(y, x);
+    if (!partida_terminada) {
+        if (event.button === 0) {
+            pulsadaDescubrir(y, x);
+        } else if (event.button === 2) {
+            pulsadaBandera(y, x);
+        }
     }
 }
 
 const pulsadaBandera = (y, x) => {
-    if (partida_terminada) return
 
     const casilla = casillasHtml[y][x]
     const contenido = arrayTablero[0][y][x]
@@ -163,10 +141,6 @@ const pulsadaDescubrir = (yInicial, xInicial) => {
 
     const mensaje = document.getElementById("mensaje")
 
-    if (partida_terminada) {
-        return
-    }
-
     // Fuera del tablero
     if (
         xInicial < 0 || xInicial >= TAMANYO_TABLERO ||
@@ -179,6 +153,12 @@ const pulsadaDescubrir = (yInicial, xInicial) => {
     if (arrayTablero[0][yInicial][xInicial] === 2) {
         descubrirVecinos(yInicial, xInicial)
         return
+    }
+
+    // En el primer descubrimiento real se generan las bombas, evitando esta casilla y sus vecinas
+    if (!bombasGeneradas && arrayTablero[0][yInicial][xInicial] === 0) {
+        rellenarTablero(yInicial, xInicial)
+        bombasGeneradas = true
     }
 
     const pila = [[yInicial, xInicial]]
@@ -203,7 +183,8 @@ const pulsadaDescubrir = (yInicial, xInicial) => {
             casilla.textContent = "💣"
             casilla.classList.add("bomba")
 
-            if (mensaje) mensaje.textContent = "Has perdido"
+            mensaje.textContent = "Has perdido"
+            destaparTableroAlPerder(y, x)
             partida_terminada = true
             return
         }
@@ -223,7 +204,7 @@ const pulsadaDescubrir = (yInicial, xInicial) => {
     }
 
     if (comprobarVictoria()) {
-        if (mensaje) mensaje.textContent = "Has ganado"
+        mensaje.textContent = "Has ganado"
         partida_terminada = true
     }
 }
@@ -261,8 +242,70 @@ const comprobarVictoria = () => {
     return casillasDescubiertas === casillasSinBombas
 }
 
-const rellenarTablero = () => {
+const destaparTableroAlPerder = (yPerdedora, xPerdedora) => {
+
+    for (let y = 0; y < TAMANYO_TABLERO; y++) {
+        for (let x = 0; x < TAMANYO_TABLERO; x++) {
+
+            const casilla = casillasHtml[y][x]
+            const estado = arrayTablero[0][y][x]
+            const contenido = arrayTablero[1][y][x]
+
+            casilla.classList.remove(
+                "bomba-revelada",
+                "bomba-perdedora",
+                "bomba-bandera",
+                "bandera-incorrecta"
+            )
+
+            casilla.classList.add("vista")
+
+            if (estado === 1) {
+
+                casilla.textContent = "🚩"
+
+                if (contenido === 9) {
+                    casilla.classList.add("bomba-bandera")
+                } else {
+                    casilla.classList.add("bandera-incorrecta")
+                }
+
+                continue
+            }
+
+            if (contenido === 9) {
+
+                casilla.textContent = "💣"
+
+                if (y === yPerdedora && x === xPerdedora) {
+                    casilla.classList.add("bomba-perdedora")
+                } else {
+                    casilla.classList.add("bomba-revelada")
+                }
+
+                continue
+            }
+
+            if (contenido === 0) {
+                casilla.textContent = ""
+            } else {
+                casilla.textContent = contenido
+                casilla.classList.add(`numero-${contenido}`)
+            }
+        }
+    }
+}
+
+const rellenarTablero = (ySegura, xSegura) => {
+
+    // Casilla pulsada y sus vecinas
+    const zonaSegura = new Set(
+        [[ySegura, xSegura], ...obtenerVecinos(ySegura, xSegura)]
+            .map(([y, x]) => y * TAMANYO_TABLERO + x)
+    )
+
     let casillas = conseguirCasillas()
+        .filter(([y, x]) => !zonaSegura.has(y * TAMANYO_TABLERO + x))
 
     // Se randomizan todas las casillas disponibles
     for (let i = casillas.length - 1; i > 0; i--) {
