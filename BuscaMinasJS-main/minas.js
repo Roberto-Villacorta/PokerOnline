@@ -1,10 +1,26 @@
-// Desarrollado originalmente por Marcos Alonso Álvarez (@mraldev - https://github.com/mraldev)
-// Adaptado para Club de Casino (Modo Recreativo sin apuestas)
+// Desarrollado por Marcos Alonso Álvarez
 
 let CANTIDAD_BOMBAS = 10
 let TAMANYO_TABLERO = 10
 let casillasDescubiertas = 0
 let partida_terminada = false
+let bombasGeneradas = false
+let tiempo = 0
+let intervaloCronometro = null
+let cronometroIniciado = false
+
+/**
+ * Niveles de dificultad predefinidos (tablero cuadrado de tamanyo x tamanyo)
+ */
+const DIFICULTADES = {
+    facil: { tamanyo: 8, bombas: 10 },
+    medio: { tamanyo: 12, bombas: 25 },
+    dificil: { tamanyo: 16, bombas: 40 },
+    experto: { tamanyo: 20, bombas: 80 }
+}
+
+const TAMANYO_MIN = 5
+const TAMANYO_MAX = 24
 
 /**
  * Array tridimensional que sirve para manejar el tablero de forma oculta e interna mediante el javascript
@@ -16,60 +32,102 @@ let partida_terminada = false
  * a la casilla en cuestión, pudiendo ir desde 0 si no hay bombas adyacentes hasta un teórico 8. La única 
  * excepción es el número 9 que representa la bomba en si
  */
-let arrayTablero = []
-let casillasHtml = []
+let arrayTablero = Array.from({ length: 2 }, () =>
+    Array.from({ length: TAMANYO_TABLERO }, () =>
+        Array(TAMANYO_TABLERO).fill(0)
+    )
+)
+
+let casillasHtml = Array.from(
+    { length: TAMANYO_TABLERO },
+    () => Array(TAMANYO_TABLERO)
+)
 
 /**
  * Caché con los vecinos válidos de cada casilla
- * Se calcula una única vez al arrancar, ya que las posiciones relativas
- * de los vecinos nunca cambian mientras el tamaño del tablero sea fijo
+ * Se recalcula cada vez que cambia el tamaño del tablero
  */
 let vecinosCache = null
 
 document.addEventListener("DOMContentLoaded", () => {
-    precalcularVecinos()
-    iniciarPartida()
 
-    const btnReiniciar = document.getElementById("btnReiniciar")
-    if (btnReiniciar) {
-        btnReiniciar.addEventListener("click", () => {
-            iniciarPartida()
-        })
-    }
+    const selectDificultad = document.getElementById("dificultad")
+    const filaPersonalizada = document.getElementById("personalizado")
+
+    document.addEventListener("keydown", (event) => {
+        if (event.code === "Space") reiniciarPartida()
+    })
+
+    selectDificultad.addEventListener("change", () => {
+        const nivel = selectDificultad.value
+
+        if (nivel === "personalizado") {
+            filaPersonalizada.style.display = "flex"
+            return
+        }
+
+        filaPersonalizada.style.display = "none"
+        aplicarDificultad(DIFICULTADES[nivel].tamanyo, DIFICULTADES[nivel].bombas)
+    })
+
+    document.getElementById("btnAplicar").addEventListener("click", () => {
+        const tamanyo = parseInt(document.getElementById("inputTamanyo").value, 10)
+        const bombas = parseInt(document.getElementById("inputBombas").value, 10)
+        const maxBombas = tamanyo * tamanyo - 9
+
+        if (!(tamanyo >= TAMANYO_MIN && tamanyo <= TAMANYO_MAX)) {
+            document.getElementById("mensaje").textContent =
+                `El tamaño debe estar entre ${TAMANYO_MIN} y ${TAMANYO_MAX}`
+            return
+        }
+
+        if (!(bombas >= 1 && bombas <= maxBombas)) {
+            document.getElementById("mensaje").textContent =
+                `Las bombas deben estar entre 1 y ${maxBombas}`
+            return
+        }
+
+        aplicarDificultad(tamanyo, bombas)
+    })
+
+    document.getElementById("btnReiniciar").addEventListener("mousedown", () => {
+        reiniciarPartida()
+
+    })
+
+    const inicial = DIFICULTADES[selectDificultad.value]
+    aplicarDificultad(inicial.tamanyo, inicial.bombas)
 })
 
-function iniciarPartida() {
-    casillasDescubiertas = 0
-    partida_terminada = false
+/**
+ * Cambia el tamaño del tablero y el número de bombas, reconstruye las casillas
+ * HTML y deja la partida lista para empezar de cero
+ */
+const aplicarDificultad = (tamanyo, bombas) => {
 
-    const mensaje = document.getElementById("mensaje")
-    if (mensaje) {
-        mensaje.textContent = ""
-    }
-
-    arrayTablero = Array.from({ length: 2 }, () =>
-        Array.from({ length: TAMANYO_TABLERO }, () =>
-            Array(TAMANYO_TABLERO).fill(0)
-        )
-    )
-
-    casillasHtml = Array.from(
-        { length: TAMANYO_TABLERO },
-        () => Array(TAMANYO_TABLERO)
-    )
+    TAMANYO_TABLERO = tamanyo
+    CANTIDAD_BOMBAS = bombas
 
     const tableroHtml = document.getElementById("tablero")
-    if (!tableroHtml) return
-
     tableroHtml.innerHTML = ""
+    tableroHtml.style.setProperty("--tam", tamanyo)
+    tableroHtml.style.setProperty(
+        "--celda-max",
+        tamanyo <= 12 ? "40px" : tamanyo <= 16 ? "34px" : "30px"
+    )
 
-    for (let fila = 0; fila < arrayTablero[0].length; fila++) {
-        for (let columna = 0; columna < arrayTablero[0][0].length; columna++) {
+    casillasHtml = Array.from({ length: tamanyo }, () => Array(tamanyo))
+
+    precalcularVecinos()
+
+    for (let fila = 0; fila < tamanyo; fila++) {
+        for (let columna = 0; columna < tamanyo; columna++) {
 
             const casilla = document.createElement("button")
             casilla.className = "casilla"
 
             casilla.addEventListener("mousedown", (event) => {
+
                 pulsarCasilla(fila, columna, event)
             })
 
@@ -78,12 +136,69 @@ function iniciarPartida() {
             })
 
             casillasHtml[fila][columna] = casilla
+
             tableroHtml.appendChild(casilla)
         }
     }
 
-    rellenarTablero()
+    reiniciarPartida()
 }
+
+const iniciarCronometro = () => {
+    if (cronometroIniciado) {
+        return
+    }
+
+    cronometroIniciado = true
+
+    intervaloCronometro = setInterval(() => {
+        tiempo++
+        document.getElementById("cronometro").textContent = `Tiempo: ${tiempo} s`
+    }, 1000)
+}
+
+const detenerCronometro = () => {
+    clearInterval(intervaloCronometro)
+    intervaloCronometro = null
+}
+
+const reiniciarCronometro = () => {
+    detenerCronometro()
+
+    tiempo = 0
+    cronometroIniciado = false
+
+    document.getElementById("cronometro").textContent = "Tiempo: 0 s"
+}
+
+const reiniciarPartida = () => {
+
+    reiniciarCronometro()
+
+    casillasDescubiertas = 0
+    partida_terminada = false
+    bombasGeneradas = false
+
+    arrayTablero = Array.from({ length: 2 }, () =>
+        Array.from({ length: TAMANYO_TABLERO }, () =>
+            Array(TAMANYO_TABLERO).fill(0)
+        )
+    )
+
+    for (let y = 0; y < TAMANYO_TABLERO; y++) {
+        for (let x = 0; x < TAMANYO_TABLERO; x++) {
+
+            const casilla = casillasHtml[y][x]
+
+            casilla.textContent = ""
+
+            casilla.className = "casilla"
+        }
+    }
+
+    document.getElementById("mensaje").textContent = ""
+}
+
 
 /**
  * Calcula y guarda en caché los vecinos de cada casilla del tablero
@@ -128,15 +243,16 @@ const precalcularVecinos = () => {
 const obtenerVecinos = (y, x) => vecinosCache[y][x]
 
 const pulsarCasilla = (y, x, event) => {
-    if (event.button === 0) {
-        pulsadaDescubrir(y, x);
-    } else if (event.button === 2) {
-        pulsadaBandera(y, x);
+    if (!partida_terminada) {
+        if (event.button === 0) {
+            pulsadaDescubrir(y, x);
+        } else if (event.button === 2) {
+            pulsadaBandera(y, x);
+        }
     }
 }
 
 const pulsadaBandera = (y, x) => {
-    if (partida_terminada) return
 
     const casilla = casillasHtml[y][x]
     const contenido = arrayTablero[0][y][x]
@@ -163,10 +279,6 @@ const pulsadaDescubrir = (yInicial, xInicial) => {
 
     const mensaje = document.getElementById("mensaje")
 
-    if (partida_terminada) {
-        return
-    }
-
     // Fuera del tablero
     if (
         xInicial < 0 || xInicial >= TAMANYO_TABLERO ||
@@ -179,6 +291,13 @@ const pulsadaDescubrir = (yInicial, xInicial) => {
     if (arrayTablero[0][yInicial][xInicial] === 2) {
         descubrirVecinos(yInicial, xInicial)
         return
+    }
+
+    // En el primer descubrimiento real se generan las bombas, evitando esta casilla y sus vecinas
+    if (!bombasGeneradas && arrayTablero[0][yInicial][xInicial] === 0) {
+        rellenarTablero(yInicial, xInicial)
+        bombasGeneradas = true
+        iniciarCronometro()
     }
 
     const pila = [[yInicial, xInicial]]
@@ -203,8 +322,10 @@ const pulsadaDescubrir = (yInicial, xInicial) => {
             casilla.textContent = "💣"
             casilla.classList.add("bomba")
 
-            if (mensaje) mensaje.textContent = "Has perdido"
+            mensaje.textContent = "Has perdido"
+            destaparTableroAlPerder(y, x)
             partida_terminada = true
+            detenerCronometro()
             return
         }
 
@@ -223,7 +344,8 @@ const pulsadaDescubrir = (yInicial, xInicial) => {
     }
 
     if (comprobarVictoria()) {
-        if (mensaje) mensaje.textContent = "Has ganado"
+        mensaje.textContent = "Has ganado"
+        detenerCronometro()
         partida_terminada = true
     }
 }
@@ -261,8 +383,70 @@ const comprobarVictoria = () => {
     return casillasDescubiertas === casillasSinBombas
 }
 
-const rellenarTablero = () => {
+const destaparTableroAlPerder = (yPerdedora, xPerdedora) => {
+
+    for (let y = 0; y < TAMANYO_TABLERO; y++) {
+        for (let x = 0; x < TAMANYO_TABLERO; x++) {
+
+            const casilla = casillasHtml[y][x]
+            const estado = arrayTablero[0][y][x]
+            const contenido = arrayTablero[1][y][x]
+
+            casilla.classList.remove(
+                "bomba-revelada",
+                "bomba-perdedora",
+                "bomba-bandera",
+                "bandera-incorrecta"
+            )
+
+            casilla.classList.add("vista")
+
+            if (estado === 1) {
+
+                casilla.textContent = "🚩"
+
+                if (contenido === 9) {
+                    casilla.classList.add("bomba-bandera")
+                } else {
+                    casilla.classList.add("bandera-incorrecta")
+                }
+
+                continue
+            }
+
+            if (contenido === 9) {
+
+                casilla.textContent = "💣"
+
+                if (y === yPerdedora && x === xPerdedora) {
+                    casilla.classList.add("bomba-perdedora")
+                } else {
+                    casilla.classList.add("bomba-revelada")
+                }
+
+                continue
+            }
+
+            if (contenido === 0) {
+                casilla.textContent = ""
+            } else {
+                casilla.textContent = contenido
+                casilla.classList.add(`numero-${contenido}`)
+            }
+        }
+    }
+}
+
+const rellenarTablero = (ySegura, xSegura) => {
+
+    // Casilla pulsada y sus vecinas
+    const zonaSegura = new Set(
+        [[ySegura, xSegura], ...obtenerVecinos(ySegura, xSegura)]
+            .map(([y, x]) => y * TAMANYO_TABLERO + x)
+    )
+
     let casillas = conseguirCasillas()
+        .filter(([y, x]) => !zonaSegura.has(y * TAMANYO_TABLERO + x))
 
     // Se randomizan todas las casillas disponibles
     for (let i = casillas.length - 1; i > 0; i--) {
@@ -273,7 +457,7 @@ const rellenarTablero = () => {
         casillas[j] = temporal
     }
 
-    // Se ponen las bombas en las 10 primeras casillas, como están randomizadas a efectos prácticos se ponen al azar
+    // Se ponen las bombas en las primeras casillas, como están randomizadas a efectos prácticos se ponen al azar
     for (let i = 0; i < CANTIDAD_BOMBAS; i++) {
         const [y, x] = casillas[i]
         arrayTablero[1][y][x] = 9
