@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Plinko</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f7f7f7;
+            margin: 20px;
+        }
+        .panel-apuestas {
+            margin: 15px auto;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #ccc;
+            display: inline-block;
+        }
+        .panel-apuestas label, .panel-apuestas input, .panel-apuestas button {
+            margin: 0 5px;
+            font-size: 15px;
+        }
+        #mensaje {
+            font-weight: bold;
+            color: #333;
+            min-height: 20px;
+        }
+        canvas {
+            display: block;
+            margin: 10px auto;
+            border: 2px solid #333;
+        }
+    </style>
+
+    <!-- 1. Librería p5.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+
+    <!-- 2. Objetos de Plinko cargados de forma estándar (sin CORS ni modules) -->
+    <script src="js/plinko/objetos/obstaculo.js"></script>
+    <script src="js/plinko/objetos/pelota.js"></script>
+    <script src="js/plinko/objetos/helperBolas.js"></script>
+    <script src="js/plinko/objetos/bucleJuego.js"></script>
+</head>
+<body>
+
+    <h1>Juego de Plinko</h1>
+
+    <div class="panel-apuestas">
+        <span><strong>Saldo:</strong> <span id="saldo">1000.00</span> €</span>
+        |
+        <label for="apuesta"><strong>Apuesta:</strong></label>
+        <input type="number" id="apuesta" value="10" min="1" max="1000" style="width: 70px;">
+        <span>€</span>
+
+        <button id="btnApostar" type="button">Apostar y Soltar Pelota</button>
+        <button id="btnGratis" type="button">Soltar Gratis</button>
+    </div>
+
+    <p id="mensaje">Haz tu apuesta y presiona el botón para lanzar la pelota.</p>
+
+    <!-- Script de control de apuestas -->
+    <script>
+        let saldo = 1000.00;
+        const elSaldo = document.getElementById('saldo');
+        const elApuesta = document.getElementById('apuesta');
+        const elMensaje = document.getElementById('mensaje');
+        const btnApostar = document.getElementById('btnApostar');
+        const btnGratis = document.getElementById('btnGratis');
+
+        // Botón de apostar
+        btnApostar.addEventListener('click', () => {
+            const cant = parseFloat(elApuesta.value);
+            if (isNaN(cant) || cant <= 0) {
+                elMensaje.textContent = "Introduce una cantidad válida para apostar.";
+                return;
+            }
+            if (cant > saldo) {
+                elMensaje.textContent = "No tienes suficiente saldo.";
+                return;
+            }
+
+            saldo -= cant;
+            elSaldo.textContent = saldo.toFixed(2);
+            elMensaje.textContent = "Pelota en juego. ¡Esperando que caiga en una casilla!";
+
+            // Se lanza la pelota cerca del centro superior con pequeña variación
+            const centroX = (typeof width !== 'undefined') ? width / 2 : 250;
+            const posAleatoria = centroX + (Math.random() - 0.5) * 8;
+            lanzarPelota(posAleatoria, cant);
+        });
+
+        // Botón gratis para pruebas
+        btnGratis.addEventListener('click', () => {
+            const centroX = (typeof width !== 'undefined') ? width / 2 : 250;
+            const posAleatoria = centroX + (Math.random() - 0.5) * 8;
+            lanzarPelota(posAleatoria, 0);
+            elMensaje.textContent = "Pelota de prueba lanzada sin apuesta.";
+        });
+
+        // Callback invocado automáticamente desde helperBolas.js cuando la pelota cae en una casilla
+        window.resolverApuesta = function(premio, multiplicador, apuesta) {
+            if (apuesta > 0) {
+                saldo += premio;
+                elSaldo.textContent = saldo.toFixed(2);
+                if (premio >= apuesta) {
+                    elMensaje.textContent = "¡Ganaste " + premio.toFixed(2) + " €! Multiplicador obtenido: " + multiplicador + "x";
+                } else {
+                    elMensaje.textContent = "Recuperas " + premio.toFixed(2) + " € (Multiplicador: " + multiplicador + "x)";
+                }
+            } else {
+                elMensaje.textContent = "Pelota de prueba cayó en casilla: " + multiplicador + "x";
+            }
+        };
+    </script>
+
+</body>
+</html>
