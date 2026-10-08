@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados Monte Carlo - Plinko</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f4f6f9;
+            color: #333333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .contenedor {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            padding: 24px 30px;
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #1a365d;
+            font-size: 24px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 12px;
+        }
+
+        .formulario {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .campo {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .campo label {
+            font-size: 13px;
+            font-weight: bold;
+            color: #4a5568;
+        }
+
+        .campo input, .campo select {
+            padding: 8px 12px;
+            font-size: 14px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+        }
+
+        .campo input {
+            width: 120px;
+        }
+
+        button {
+            padding: 9px 18px;
+            background-color: #2b6cb0;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #2c5282;
+        }
+
+        .metricas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .tarjeta {
+            background-color: #edf2f7;
+            border-radius: 6px;
+            padding: 12px 16px;
+            border-left: 4px solid #4a5568;
+        }
+
+        .tarjeta-titulo {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #718096;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .tarjeta-valor {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1a202c;
+        }
+
+        .positivo {
+            color: #276749 !important;
+            border-left-color: #276749;
+        }
+
+        .negativo {
+            color: #9b2c2c !important;
+            border-left-color: #9b2c2c;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+
+        th {
+            background-color: #edf2f7;
+            color: #2d3748;
+            text-align: left;
+            padding: 10px 12px;
+            border-bottom: 2px solid #cbd5e0;
+        }
+
+        td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        tr:hover {
+            background-color: #f7fafc;
+        }
+
+        .barra-contenedor {
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+            height: 14px;
+            width: 100%;
+        }
+
+        .barra-relleno {
+            background-color: #3182ce;
+            height: 100%;
+        }
+
+        #estado {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #718096;
+        }
+    </style>
+    <script src="montecarloPlinco.js"></script>
+</head>
+<body>
+
+    <div class="contenedor">
+        <h1>Simulacion Monte Carlo - Analisis de Plinko</h1>
+
+        <div class="formulario">
+            <div class="campo">
+                <label for="selectNivel">Nivel de Riesgo:</label>
+                <select id="selectNivel">
+                    <option value="1">Nivel 1 - Bajo (8 filas, 9 casillas, max 3.7x)</option>
+                    <option value="2">Nivel 2 - Medio (10 filas, 11 casillas, max 4.8x)</option>
+                    <option value="3">Nivel 3 - Alto (12 filas, 13 casillas, max 6.0x)</option>
+                </select>
+            </div>
+            <div class="campo">
+                <label for="inputPelotas">Numero de pelotas:</label>
+                <input type="number" id="inputPelotas" value="20000" min="500" step="5000">
+            </div>
+            <div class="campo">
+                <label for="inputApuesta">Apuesta por pelota:</label>
+                <input type="number" id="inputApuesta" value="1" min="0.1" step="0.5">
+            </div>
+            <button id="btnEjecutar" type="button" onclick="ejecutarSimulacion()">Ejecutar Simulacion</button>
+        </div>
+
+        <div id="estado">Listo para simular.</div>
+
+        <div class="metricas" style="margin-top: 15px;">
+            <div class="tarjeta">
+                <div class="tarjeta-titulo">Total Apostado</div>
+                <div class="tarjeta-valor" id="mTotalApostado">-</div>
+            </div>
+            <div class="tarjeta">
+                <div class="tarjeta-titulo">Total Retornado</div>
+                <div class="tarjeta-valor" id="mTotalRetornado">-</div>
+            </div>
+            <div class="tarjeta" id="cajaBeneficio">
+                <div class="tarjeta-titulo">Beneficio Neto</div>
+                <div class="tarjeta-valor" id="mBeneficioNeto">-</div>
+            </div>
+            <div class="tarjeta">
+                <div class="tarjeta-titulo">Valor Esperado (EV)</div>
+                <div class="tarjeta-valor" id="mEV">-</div>
+            </div>
+            <div class="tarjeta" id="cajaRTP">
+                <div class="tarjeta-titulo">RTP</div>
+                <div class="tarjeta-valor" id="mRTP">-</div>
+            </div>
+            <div class="tarjeta" id="cajaROI">
+                <div class="tarjeta-titulo">ROI</div>
+                <div class="tarjeta-valor" id="mROI">-</div>
+            </div>
+        </div>
+
+        <h2 style="font-size: 18px; color: #2d3748; margin-top: 25px; margin-bottom: 5px;">Distribucion por Casilla</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Casilla</th>
+                    <th>Multiplicador</th>
+                    <th>Bolas Caidas</th>
+                    <th>Probabilidad</th>
+                    <th>Aporte EV</th>
+                    <th style="width: 28%;">Distribucion</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpoTabla">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function ejecutarSimulacion() {
+            let elEstado = document.getElementById("estado");
+            elEstado.textContent = "Calculando trayectorias fisicas...";
+
+            let nivel = parseInt(document.getElementById("selectNivel").value, 10);
+            let nPelotas = parseInt(document.getElementById("inputPelotas").value, 10);
+            let apuesta = parseFloat(document.getElementById("inputApuesta").value);
+
+            if (isNaN(nivel)) nivel = 1;
+            if (isNaN(nPelotas) || nPelotas <= 0) nPelotas = 20000;
+            if (isNaN(apuesta) || apuesta <= 0) apuesta = 1;
+
+            setTimeout(() => {
+                let sim = new MontecarloPlinko(nivel);
+                let res = sim.ejecutar(nPelotas, apuesta);
+
+                document.getElementById("mTotalApostado").textContent = res.totalApostado.toFixed(2) + " €";
+                document.getElementById("mTotalRetornado").textContent = res.totalRetornado.toFixed(2) + " €";
+                
+                let elBeneficio = document.getElementById("mBeneficioNeto");
+                elBeneficio.textContent = (res.beneficioNeto >= 0 ? "+" : "") + res.beneficioNeto.toFixed(2) + " €";
+                
+                let cajaBeneficio = document.getElementById("cajaBeneficio");
+                let cajaRTP = document.getElementById("cajaRTP");
+                let cajaROI = document.getElementById("cajaROI");
+
+                let esGanador = res.roi >= 0;
+                cajaBeneficio.className = "tarjeta " + (esGanador ? "positivo" : "negativo");
+                cajaRTP.className = "tarjeta " + (esGanador ? "positivo" : "negativo");
+                cajaROI.className = "tarjeta " + (esGanador ? "positivo" : "negativo");
+
+                document.getElementById("mEV").textContent = res.ev.toFixed(4);
+                document.getElementById("mRTP").textContent = res.rtp.toFixed(2) + "%";
+                document.getElementById("mROI").textContent = (res.roi >= 0 ? "+" : "") + res.roi.toFixed(2) + "%";
+
+                let cuerpo = document.getElementById("cuerpoTabla");
+                cuerpo.innerHTML = "";
+
+                let maxProb = 0;
+                res.frecuencias.forEach(f => {
+                    let p = (f / nPelotas) * 100;
+                    if (p > maxProb) maxProb = p;
+                });
+
+                res.multiplicadores.forEach((mult, idx) => {
+                    let caidas = res.frecuencias[idx];
+                    let prob = (caidas / nPelotas) * 100;
+                    let aporte = (prob / 100) * mult;
+                    let anchoRelativo = maxProb > 0 ? (prob / maxProb) * 100 : 0;
+
+                    let fila = document.createElement("tr");
+                    fila.innerHTML = `
+                        <td>${idx + 1}</td>
+                        <td><strong>${mult}x</strong></td>
+                        <td>${caidas.toLocaleString()}</td>
+                        <td>${prob.toFixed(2)}%</td>
+                        <td>${aporte.toFixed(4)}</td>
+                        <td>
+                            <div class="barra-contenedor">
+                                <div class="barra-relleno" style="width: ${anchoRelativo}%;"></div>
+                            </div>
+                        </td>
+                    `;
+                    cuerpo.appendChild(fila);
+                });
+
+                elEstado.textContent = "Simulacion completada con " + nPelotas.toLocaleString() + " pelotas.";
+            }, 30);
+        }
+
+        document.getElementById("selectNivel").addEventListener("change", () => {
+            ejecutarSimulacion();
+        });
+
+        window.addEventListener("DOMContentLoaded", () => {
+            ejecutarSimulacion();
+        });
+    </script>
+</body>
+</html>

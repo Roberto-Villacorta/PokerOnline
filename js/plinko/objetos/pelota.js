@@ -1,5 +1,5 @@
 class Pelota extends Obstaculo {
-    constructor(x = 100, y = 100, vx = 0, vy = 0, radio = 8, rebote = 0.5, color = 'red', apuesta = 0) {
+    constructor(x = 250, y = 30, vx = 0, vy = 1, radio = 6.5, rebote = 0.5, color = '#e53e3e', apuesta = 0) {
         super(x, y, radio, rebote, color);
         this.vx = vx;
         this.vy = vy;
@@ -7,11 +7,12 @@ class Pelota extends Obstaculo {
     }
 
     actualizar() {
-        this.vy += 0.2; 
+        this.vy += 0.28;
+        this.vx *= 0.98;
         this.x += this.vx;
         this.y += this.vy;
 
-        // Rebote en paredes laterales
+        // Rebotes en los limites exteriores del canvas
         if (typeof width !== 'undefined') {
             if (this.x - this.radio < 0) {
                 this.x = this.radio;
@@ -31,17 +32,16 @@ class Pelota extends Obstaculo {
 
         if (dist < minDist && dist > 0) {
             let angulo = Math.atan2(dy, dx);
-            // Reposicionar fuera del obstáculo
             this.x = obstaculo.x + Math.cos(angulo) * (minDist + 0.5);
             this.y = obstaculo.y + Math.sin(angulo) * (minDist + 0.5);
 
-            // Calcular rebote con pequeña variación aleatoria
             let rapidez = Math.hypot(this.vx, this.vy) * obstaculo.rebote;
-            rapidez = Math.max(rapidez, 1.8);
-            let desvio = (Math.random() - 0.5) * 0.4;
-            this.vx = Math.cos(angulo + desvio) * rapidez;
-            this.vy = Math.sin(angulo + desvio) * rapidez;
-            if (this.vy < 0) this.vy *= 0.6;
+            if (rapidez < 1.6) rapidez = 1.6;
+
+            let impulsoLateral = (dx >= 0 ? 0.6 : -0.6);
+            this.vx = Math.cos(angulo) * rapidez + impulsoLateral;
+            this.vy = Math.sin(angulo) * rapidez;
+            if (this.vy < 0) this.vy *= 0.4;
         }
     }
 }
